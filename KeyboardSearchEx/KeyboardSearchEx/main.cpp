@@ -5,6 +5,8 @@
 #include<fstream>
 #include<sstream>
 #include<vector>
+#include <algorithm> //set_difference
+#include <assert.h>
 #include "trie.hpp"
 using namespace std;
 
@@ -22,7 +24,7 @@ void print(iteratorT first, iteratorT end) {
 void csv_to_dictionary(Trie* dict) {
     ifstream infile;
     string new_word, frequency;
-    infile.open("wordsandfrequency.csv", ifstream::in);
+    infile.open("wordsandfrequency1000words.csv", ifstream::in);
     if (infile.is_open()) {
         while (infile.good()) {
             getline(infile, new_word, ',');
@@ -44,14 +46,42 @@ void csv_to_dictionary(Trie* dict) {
     std::cout << "abccc = " << dict->search("abccc") << "\n";
 }
 
+template<typename T>
+void remove_intersection(std::vector<T>* c1, std::vector<T>* c2) {
+    assert(c1 != nullptr);
+    assert(c2 != nullptr);
+
+    std::sort(std::begin(*c1), std::end(*c1));  // O(n1 logn1)
+    std::sort(std::begin(*c2), std::end(*c2));  // O(n2 logn2)
+
+    std::vector<T> difference1, difference2;
+    difference1.reserve(c1->size());
+    difference2.reserve(c2->size());
+
+    std::set_difference(std::begin(*c1), std::end(*c1),
+        std::begin(*c2), std::end(*c2),
+        std::back_inserter(difference1));
+    // O(2*[N1 + N2 - 1])
+
+    std::set_difference(std::begin(*c2), std::end(*c2),
+        std::begin(*c1), std::end(*c1),
+        std::back_inserter(difference2));
+    // O(2*[N1 + N2 - 1])
+
+    *c1 = std::move(difference1);  // O(1)
+    *c2 = std::move(difference2);  // O(1)
+}
+
+
 int main() {
 
     Trie dictionary;
     csv_to_dictionary(&dictionary);
 
-  
+
 
     vector<string> suggested_words;
+    vector<string> old_current_words;
     vector<string> current_words;
     vector<string> added_words;
     char typed_num;
@@ -73,7 +103,7 @@ int main() {
         }
         else {
             string typed_chars = keys.find(typed_num)->second;
-            auto end_loop = current_words.size();
+            old_current_words = current_words;
 
             for (int it = 0; it < typed_chars.length(); ++it) { //for each letter that matches number typed
                 if (characters_typed == 1) {                                                       //only for first letter added
@@ -81,9 +111,7 @@ int main() {
                     //std::cout << string(1, typed_chars[it]) << " added\n";
                 }
                 else {
-                    for (int it2 = 0; it2 < end_loop; ++it2) {           //when there's words already
-                        //std::cout << end_loop << "\n";
-                        //PAREI AQUI
+                    for (int it2 = 0; it2 < current_words.size(); ++it2) {           //when there's words already
                         string test = current_words[it2];
                         test.push_back(typed_chars[it]);
                         //std::cout << "test = " << test<< " *it = " << *it << "\n";
@@ -93,7 +121,6 @@ int main() {
                     }
                 }
             }
-
             for (auto it2 = added_words.begin(); it2 != added_words.end(); ++it2) {
                 int search_result = dictionary.search(*it2);
                 if (search_result == -1) {
@@ -115,10 +142,14 @@ int main() {
                     // it2->search(*it);                                                            //search in the node if it has a children node with letter wanted
 
             }
-
-            current_words = added_words;
-            //std::cout << "\nCurrent Words : ";
-            //print(current_words.begin(), current_words.end());
+            std::cout << "\nCurrent Words : ";
+            print(current_words.begin(), current_words.end());
+            std::cout << "\nOld Suggested Words : ";
+            print(old_current_words.begin(), old_current_words.end());
+            if (characters_typed > 1)
+                remove_intersection(&current_words, &old_current_words);
+            std::cout << "\nCurrent Words : ";
+            print(current_words.begin(), current_words.end());
             std::cout << "Suggested Words : ";
             print(suggested_words.begin(), suggested_words.end());
 

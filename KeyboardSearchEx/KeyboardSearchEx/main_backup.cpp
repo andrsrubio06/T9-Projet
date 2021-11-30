@@ -45,10 +45,10 @@ void csv_to_dictionary(Trie* dict) {
 }
 
 
-auto suggestions(char typed_num, int* characters_typed, Trie* dictionary, vector<string>* current_words) {
+void suggestions(char typed_num, int* characters_typed, Trie* dictionary, vector<string>* current_words) {
     vector<string>* suggested_words = new vector<string>;
     vector<string>* added_words = new vector<string>;
-
+    //if (typed_num == 'e') break;
     if (typed_num == 'c') {
         current_words->clear();
         added_words->clear();
@@ -67,6 +67,7 @@ auto suggestions(char typed_num, int* characters_typed, Trie* dictionary, vector
                 for (int it2 = 0; it2 < end_loop; ++it2) {           //for 2 or more letters added
                     string test = current_words->at(it2);
                     test.push_back(typed_chars[it]);
+                    std::cout << "test = " << test << '\n';
                     added_words->push_back(test);
                 }
             }
@@ -87,7 +88,7 @@ auto suggestions(char typed_num, int* characters_typed, Trie* dictionary, vector
                 suggested_words->push_back(*it2);
             }
         }
-        current_words = added_words;
+        //current_words = added_words;
         std::cout << "\nCurrent Words : ";
         print(current_words->begin(), current_words->end());
         std::cout << "Suggested Words : ";
@@ -105,7 +106,7 @@ int main() {
     Trie dictionary;
     csv_to_dictionary(&dictionary);
 
-    vector<string> current_words;
+    vector<string>* current_words = new vector<string>;
     char typed_num;
     int characters_typed = 0;
 
@@ -116,7 +117,7 @@ int main() {
         std::cout << "\nType number (2-9):";
         std::cin >> typed_num;
         characters_typed++;
-        suggestions(typed_num, &characters_typed, &dictionary, &current_words);
+        suggestions(typed_num, &characters_typed, &dictionary, current_words);
 
 
     } while (true);
