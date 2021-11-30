@@ -1,0 +1,4 @@
+﻿  main.cpp
+C:\Users\facel\Desktop\ENSTA\1 année\IN204 - Programmation Orientée Objet\Projet\KeyboardSearchEx\KeyboardSearchEx\trie.hpp(48,23): warning C4018: '<': incompatibilidade de signed/unsigned
+C:\Users\facel\Desktop\ENSTA\1 année\IN204 - Programmation Orientée Objet\Projet\KeyboardSearchEx\KeyboardSearchEx\trie.hpp(71,23): warning C4018: '<': incompatibilidade de signed/unsigned
+  KeyboardSearchEx.vcxproj -> C:\Users\facel\Desktop\ENSTA\1 année\IN204 - Programmation Orientée Objet\Projet\KeyboardSearchEx\Debug\KeyboardSearchEx.exe
