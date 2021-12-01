@@ -5,6 +5,8 @@
 #include<fstream>
 #include<sstream>
 #include<vector>
+#include <algorithm> //set_difference
+#include <assert.h>
 #include "trie.hpp"
 using namespace std;
 
@@ -44,69 +46,44 @@ void csv_to_dictionary(Trie* dict) {
     std::cout << "abccc = " << dict->search("abccc") << "\n";
 }
 
+template<typename T>
+void remove_intersection(std::vector<T>* c1, std::vector<T>* c2) {
+    assert(c1 != nullptr);
+    assert(c2 != nullptr);
 
-void suggestions(char typed_num, int* characters_typed, Trie* dictionary, vector<string>* current_words) {
-    vector<string>* suggested_words = new vector<string>;
-    vector<string>* added_words = new vector<string>;
-    //if (typed_num == 'e') break;
-    if (typed_num == 'c') {
-        current_words->clear();
-        added_words->clear();
-        suggested_words->clear();
-        *characters_typed = 0;
-    }
-    else {
-        string typed_chars = keys.find(typed_num)->second;          //convert number typed to chars
-        auto end_loop = current_words->size();
+    std::sort(std::begin(*c1), std::end(*c1));  // O(n1 logn1)
+    std::sort(std::begin(*c2), std::end(*c2));  // O(n2 logn2)
 
-        for (int it = 0; it < typed_chars.length(); ++it) { //for each letter that matches number typed
-            if (*characters_typed == 1) {                                                       //only for first letter
-                added_words->push_back(string(1, typed_chars[it]));
-            }
-            else {
-                for (int it2 = 0; it2 < end_loop; ++it2) {           //for 2 or more letters added
-                    string test = current_words->at(it2);
-                    test.push_back(typed_chars[it]);
-                    std::cout << "test = " << test << '\n';
-                    added_words->push_back(test);
-                }
-            }
-        }
+    std::vector<T> difference1, difference2;
+    difference1.reserve(c1->size());
+    difference2.reserve(c2->size());
 
-        for (auto it2 = added_words->begin(); it2 != added_words->end(); ++it2) {
-            int search_result = dictionary->search(*it2);
-            if (search_result == -1) {
-                std::cout << *it2 << " Not a tree branch\n";
-            }
-            else if (search_result == 0) {
-                std::cout << *it2 << " Only a prefix\n";
-                current_words->push_back(*it2);
-            }
-            else if (search_result == 1) {
-                std::cout << *it2 << " Its a suggested word\n";
-                current_words->push_back(*it2);
-                suggested_words->push_back(*it2);
-            }
-        }
-        //current_words = added_words;
-        std::cout << "\nCurrent Words : ";
-        print(current_words->begin(), current_words->end());
-        std::cout << "Suggested Words : ";
-        print(suggested_words->begin(), suggested_words->end());
+    std::set_difference(std::begin(*c1), std::end(*c1),
+        std::begin(*c2), std::end(*c2),
+        std::back_inserter(difference1));
+    // O(2*[N1 + N2 - 1])
 
-        added_words->clear();
-        suggested_words->clear();
-    }
+    std::set_difference(std::begin(*c2), std::end(*c2),
+        std::begin(*c1), std::end(*c1),
+        std::back_inserter(difference2));
+    // O(2*[N1 + N2 - 1])
 
-
+    *c1 = std::move(difference1);  // O(1)
+    *c2 = std::move(difference2);  // O(1)
 }
+
 
 int main() {
 
     Trie dictionary;
     csv_to_dictionary(&dictionary);
 
-    vector<string>* current_words = new vector<string>;
+
+
+    vector<string> suggested_words;
+    vector<string> old_current_words;
+    vector<string> current_words;
+    vector<string> added_words;
     char typed_num;
     int characters_typed = 0;
 
@@ -117,9 +94,68 @@ int main() {
         std::cout << "\nType number (2-9):";
         std::cin >> typed_num;
         characters_typed++;
-        suggestions(typed_num, &characters_typed, &dictionary, current_words);
+        if (typed_num == 'e') break;
+        else if (typed_num == 'c') {
+            current_words.clear();
+            added_words.clear();
+            suggested_words.clear();
+            characters_typed = 0;
+        }
+        else {
+            string typed_chars = keys.find(typed_num)->second;
+            old_current_words = current_words;
 
+            for (int it = 0; it < typed_chars.length(); ++it) { //for each letter that matches number typed
+                if (characters_typed == 1) {                                                       //only for first letter added
+                    added_words.push_back(string(1, typed_chars[it]));
+                    //std::cout << string(1, typed_chars[it]) << " added\n";
+                }
+                else {
+                    for (int it2 = 0; it2 < current_words.size(); ++it2) {           //when there's words already
+                        string test = current_words[it2];
+                        test.push_back(typed_chars[it]);
+                        //std::cout << "test = " << test<< " *it = " << *it << "\n";
+                        //std::cout << "*it2 + *it = " << test << "\n";
 
+                        added_words.push_back(test);
+                    }
+                }
+            }
+            for (auto it2 = added_words.begin(); it2 != added_words.end(); ++it2) {
+                int search_result = dictionary.search(*it2);
+                if (search_result == -1) {
+                    //std::cout << *it2 << " Not a tree branch\n";
+                    //current_words.erase(it2);
+                }
+                else if (search_result == 0) {
+                    //std::cout << *it2 << " Only a prefix\n";
+                    current_words.push_back(*it2);
+                }
+                else if (search_result == 1) {
+                    //std::cout << *it2 << " Its a suggested word\n";
+                    current_words.push_back(*it2);
+                    suggested_words.push_back(*it2);
+                }
+                //std::cout << *it << " ";
+                //for (auto it2 = current_nodes.begin(); it2 != current_nodes.end(); ++it2) {      //for each one of the viable nodes
+                    //std::cout<<"Viable Nodes"
+                    // it2->search(*it);                                                            //search in the node if it has a children node with letter wanted
+
+            }
+            std::cout << "\nCurrent Words : ";
+            print(current_words.begin(), current_words.end());
+            std::cout << "\nOld Suggested Words : ";
+            print(old_current_words.begin(), old_current_words.end());
+            if (characters_typed > 1)
+                remove_intersection(&current_words, &old_current_words);
+            std::cout << "\nCurrent Words : ";
+            print(current_words.begin(), current_words.end());
+            std::cout << "Suggested Words : ";
+            print(suggested_words.begin(), suggested_words.end());
+
+            added_words.clear();
+            suggested_words.clear();
+        }
     } while (true);
 
     return 0;

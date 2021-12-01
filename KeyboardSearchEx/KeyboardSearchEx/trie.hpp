@@ -1,10 +1,9 @@
 #include <iostream>
 using namespace std;
 
-// Define the character size
-#define CHAR_SIZE 256
+// Define the character size  ||a to z|| => ||97 to 122||
+#define CHAR_SIZE 26                        //122 - 97 + 1
 
-// A class to store a Trie node
 class Trie
 {
 public:
@@ -48,10 +47,10 @@ void Trie::insert(string key, int freq) {
     for (int i = 0; i < key.length(); i++)
     {
         // create a new node if the path doesn't exist
-        if (curr->character[key[i]] == nullptr)
-            curr->character[key[i]] = new Trie(freq);
+        if (curr->character[key[i]-'a'] == nullptr)
+            curr->character[key[i]-'a'] = new Trie(freq);
         // go to the next node
-        curr = curr->character[key[i]];
+        curr = curr->character[key[i]-'a'];
     }
     // mark the current node as a word
     curr->isWord = true;
@@ -70,7 +69,7 @@ int Trie::search(string key) {
     Trie* curr = this;
     for (int i = 0; i < key.length(); i++) {
         // go to the next node
-        curr = curr->character[key[i]];
+        curr = curr->character[key[i]-'a'];
 
         // if the string is invalid (reached end of a path in the Trie)
         if (curr == nullptr)
@@ -112,8 +111,8 @@ bool Trie::deletion(Trie*& curr, string key) {
     if (key.length()) {
         // recur for the node corresponding to the next character in the key
         // and if it returns true, delete the current node (if it is non-leaf)
-        if (curr != nullptr && curr->character[key[0]] != nullptr &&
-            deletion(curr->character[key[0]], key.substr(1)) &&
+        if (curr != nullptr && curr->character[key[0]-'a'] != nullptr &&
+            deletion(curr->character[key[0]-'a'], key.substr(1)) &&
             curr->isWord == false) {
             if (!haveChildren(curr)) {
                 delete curr;
