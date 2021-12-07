@@ -34,7 +34,6 @@ public:
     void insert(string, int freq);
     bool deletion(Trie*&, string);
     int search(string);
-    vector<Trie*> new_search(char key);
     bool haveChildren(Trie const*);
 };
 
@@ -78,18 +77,11 @@ int Trie::search(string key) {
 
     // return true if the current node is a leaf and the
     // end of the string is reached
-    return curr->isWord;
+    if (curr->isWord)
+        return curr->frequency;
+    else return 0;
 }
-/*
-vector<Trie*> Trie::new_search(char key) {
-    if (this == nullptr)
-        return nullptr;
 
-    
-
-
-}
-*/
 
 
 // Returns true if a given node has any children

@@ -15,6 +15,30 @@ using namespace std;
 const map<char, string> keys{ {'2', "abc"}, {'3', "def"}, {'4', "ghi"}, {'5',"jkl"},
         {'6', "mno"}, {'7', "pqrs"}, {'8',"tuv"}, {'9',"wxyz"} };
 
+
+//           KEYBOARD 
+//
+//   ------- ------- -------
+//  |       |       |       |      C : erase letter
+//  |   C   |   <-  |   ->  |  <-,-> : go through letters    
+//   ------- ------- -------
+//  |   1   |   2   |   3   |      1 : ponctuation marks (function
+//  |  ,.?! | a,b,c | d,e,f |          as a multi-tap keyboard)
+//   ------- ------- -------
+//  |   4   |   5   |   6   |
+//  | g,h,i | j,k,l | m,n,o |    2-9 : letters
+//   ------- ------- -------
+//  |   7   |   8   |   9   |
+//  |p,q,r,s| t,u,v |w,x,y,z|
+//   ------- ------- -------       * : next suggested word
+//  |   *   |   0   |   #   |      0 : escape
+//  |       |  ESC  |       |      # : upper/lower case
+//   ------- ------- -------
+//
+
+
+
+
 //
 //Print on console vector content
 template <typename iteratorT>
@@ -81,12 +105,25 @@ void remove_intersection(vector<T>* c1, vector<T>* c2) {
     *c2 = move(difference2);  // O(1)
 }
 
+
+
+
+//for sorting in descending order
+struct comp {
+    template<typename T>
+    bool operator()(const T& l, const T& r) const {
+        return l > r;
+    }
+};
+
+
 //
 //Returns vector of word suggestions, while changing the current_words vector
 vector<string>* suggestions(char typed_num, int* characters_typed, Trie* dictionary, vector<string>* current_words) {
-    vector<string>* suggested_words = new vector<string>;           //vector of suggested words (where dictionary.search = 1)
-    vector<string>* added_words = new vector<string>;               //vector of new words formed concatenating previous words with typed letter
-    vector<string> old_current_words;                               //vector of old current words. Used after to eliminate previous of size < current size
+    vector<pair<int, string>> suggested_pair;// = new vector<pair<int, string>>;           //vector of suggested words (where dictionary.search = 1)
+    vector<string>* suggested_words = new vector<string>;
+    vector<string>* added_words          = new vector<string>;               //vector of new words formed concatenating previous words with typed letter
+    vector<string>  old_current_words;                               //vector of old current words. Used after to eliminate previous of size < current size
                                                                     //        This ensures only words of size characters_typed will be suggested
 
         string typed_chars = keys.find(typed_num)->second;          //convert number typed to chars
@@ -105,7 +142,6 @@ vector<string>* suggestions(char typed_num, int* characters_typed, Trie* diction
                 }
             }
         }
-
         for (auto it2 = added_words->begin(); it2 != added_words->end(); ++it2) {
             int search_result = dictionary->search(*it2);
             if (search_result == -1) {
@@ -115,10 +151,11 @@ vector<string>* suggestions(char typed_num, int* characters_typed, Trie* diction
                                     //cout << *it2 << " Only a prefix\n";
                 current_words->push_back(*it2);
             }
-            else if (search_result == 1) {
+            else {
                                     //cout << *it2 << " Its a suggested word\n";
                 current_words->push_back(*it2);
-                suggested_words->push_back(*it2);
+                suggested_pair.push_back(make_pair(search_result,*it2));
+                cout << "Word: " << *it2 << " Freq: " << search_result<<"\n";
             }
         }
         //cout << "\nOld Suggested Words : ";
@@ -127,6 +164,15 @@ vector<string>* suggestions(char typed_num, int* characters_typed, Trie* diction
             remove_intersection(current_words, &old_current_words);
         //cout << "\nCurrent Words : ";
         //print(current_words->begin(), current_words->end());
+
+
+        sort(suggested_pair.begin(), suggested_pair.end(),comp());
+        for (int i = 0; i < suggested_pair.size(); i++) {
+            //if (i >= 5)
+               // break;
+             suggested_words->push_back(suggested_pair[i].second);
+        }
+        
         return suggested_words;
 }
 
@@ -151,21 +197,22 @@ int main() {
         cout << "\nType number (2-9): ";
         cin >> typed_num;
 
-            if (typed_num == 'e') break;
-            else if (typed_num == 'c') {
-                current_words->clear();
-                characters_typed = 0;
-            }
-            else if (typed_num == 'v') {
-                cout << "Current words    : ";
-                print(current_words->begin(), current_words->end());
-            }
-            else { //do assertion after : number from 2 - 9
-                characters_typed++;
-                suggested_words = suggestions(typed_num, &characters_typed, &dictionary, current_words);
-                cout << "Suggested words  : ";
-                print(suggested_words->begin(), suggested_words->end());
-            }
+        if (typed_num == 'e') break;
+        else if (typed_num == 'c') {
+            current_words->clear();
+            characters_typed = 0;
+        }
+        else if (typed_num == 'v') {
+            cout << "Current words    : ";
+            print(current_words->begin(), current_words->end());
+        }
+        else if (typed_num >= '2' && typed_num <= '9') { //do assertion after : number from 2 - 9
+            characters_typed++;
+            suggested_words = suggestions(typed_num, &characters_typed, &dictionary, current_words);
+            cout << "Suggested words  : ";
+            print(suggested_words->begin(), suggested_words->end());
+        }
+        else cout << "Wrong character, try again\n";
     }
 
     return 0;
