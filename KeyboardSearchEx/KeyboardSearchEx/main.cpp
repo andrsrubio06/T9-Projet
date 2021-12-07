@@ -120,11 +120,11 @@ struct comp {
 //
 //Returns vector of word suggestions, while changing the current_words vector
 vector<string>* suggestions(char typed_num, int* characters_typed, Trie* dictionary, vector<string>* current_words) {
-    vector<pair<int, string>> suggested_pair;// = new vector<pair<int, string>>;           //vector of suggested words (where dictionary.search = 1)
+    vector<pair<int, string>> suggested_pair;                        //vector of suggested words (where dictionary.search = 1)
     vector<string>* suggested_words = new vector<string>;
-    vector<string>* added_words          = new vector<string>;               //vector of new words formed concatenating previous words with typed letter
+    vector<string>* added_words          = new vector<string>;       //vector of new words formed concatenating previous words with typed letter
     vector<string>  old_current_words;                               //vector of old current words. Used after to eliminate previous of size < current size
-                                                                    //        This ensures only words of size characters_typed will be suggested
+                                                                     //        This ensures only words of size characters_typed will be suggested
 
         string typed_chars = keys.find(typed_num)->second;          //convert number typed to chars
         old_current_words = *current_words;
@@ -166,7 +166,7 @@ vector<string>* suggestions(char typed_num, int* characters_typed, Trie* diction
         //print(current_words->begin(), current_words->end());
 
 
-        sort(suggested_pair.begin(), suggested_pair.end(),comp());
+        sort(suggested_pair.begin(), suggested_pair.end(),comp());      //sorting in descending order
         for (int i = 0; i < suggested_pair.size(); i++) {
             //if (i >= 5)
                // break;
@@ -182,20 +182,26 @@ vector<string>* suggestions(char typed_num, int* characters_typed, Trie* diction
 int main() {
 
     Trie dictionary;
-    file_to_dictionary("wordsandfrequency.csv", &dictionary);
+    file_to_dictionary("wordsandfrequency.txt", &dictionary);
 
     vector<string>* current_words = new vector<string>;        //words that are a suggestion or a tree branch
     vector<string>* suggested_words = new vector<string>;      //words that are a suggestion
+    vector<string>* phrase = new vector<string>;
     char typed_num;                                            //number typed by the user in the prompt line
     int characters_typed = 0;                                  //quantity of characters typed
 
     cout << "\n--Suggested words mechanism--\n";
     cout << "e - exit\nc - clear search\n";
     cout << "v - view current words considered\n";
+    cout << "o - work okay, go to next word (ESC in the future)\n";
+    cout << "n - next suggested word\n";
+
+
 
     while(true) {
         cout << "\nType number (2-9): ";
         cin >> typed_num;
+        std::cout << "Typed = " << typed_num << "\n";
 
         if (typed_num == 'e') break;
         else if (typed_num == 'c') {
@@ -209,6 +215,21 @@ int main() {
         else if (typed_num >= '2' && typed_num <= '9') { //do assertion after : number from 2 - 9
             characters_typed++;
             suggested_words = suggestions(typed_num, &characters_typed, &dictionary, current_words);
+            cout << "Suggested words  : ";
+            print(suggested_words->begin(), suggested_words->end());
+        }
+        else if (typed_num == 'o') {
+            //phrase->push_back("");
+            phrase->push_back(suggested_words->front());
+            current_words->clear();
+            characters_typed = 0;
+            cout << "Phrase  : ";
+            print(phrase->begin(), phrase->end());
+        }
+        else if (typed_num == 'n') {
+            string temp = suggested_words->front();
+            suggested_words->erase(suggested_words->begin());
+            suggested_words->push_back(temp);
             cout << "Suggested words  : ";
             print(suggested_words->begin(), suggested_words->end());
         }
