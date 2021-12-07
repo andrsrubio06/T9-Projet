@@ -155,7 +155,7 @@ vector<string>* suggestions(char typed_num, int* characters_typed, Trie* diction
                                     //cout << *it2 << " Its a suggested word\n";
                 current_words->push_back(*it2);
                 suggested_pair.push_back(make_pair(search_result,*it2));
-                cout << "Word: " << *it2 << " Freq: " << search_result<<"\n";
+                //cout << "Word: " << *it2 << " Freq: " << search_result<<"\n";
             }
         }
         //cout << "\nOld Suggested Words : ";
@@ -191,17 +191,19 @@ int main() {
     int characters_typed = 0;                                  //quantity of characters typed
 
     cout << "\n--Suggested words mechanism--\n";
-    cout << "e - exit\nc - clear search\n";
-    cout << "v - view current words considered\n";
-    cout << "o - work okay, go to next word (ESC in the future)\n";
-    cout << "n - next suggested word\n";
+    cout << "2:9 - keyboard letters\n";
+    cout << "  e - exit\n";
+    cout << "  c - clear search\n";
+    cout << "  v - view current words considered\n";
+    cout << "  0 - word okay, go to next word\n";
+    cout << "  n - next suggested word\n";
+    cout << "  c - erase letter\n";
 
 
 
     while(true) {
-        cout << "\nType number (2-9): ";
+        cout << "                 : ";
         cin >> typed_num;
-        std::cout << "Typed = " << typed_num << "\n";
 
         if (typed_num == 'e') break;
         else if (typed_num == 'c') {
@@ -218,12 +220,12 @@ int main() {
             cout << "Suggested words  : ";
             print(suggested_words->begin(), suggested_words->end());
         }
-        else if (typed_num == 'o') {
+        else if (typed_num == '0') {
             //phrase->push_back("");
             phrase->push_back(suggested_words->front());
             current_words->clear();
             characters_typed = 0;
-            cout << "Phrase  : ";
+            cout << "         Phrase  : ";
             print(phrase->begin(), phrase->end());
         }
         else if (typed_num == 'n') {
@@ -232,6 +234,9 @@ int main() {
             suggested_words->push_back(temp);
             cout << "Suggested words  : ";
             print(suggested_words->begin(), suggested_words->end());
+        }
+        else if (typed_num == 'c') {
+            cout << "Letter erased (to be implemented)\n";
         }
         else cout << "Wrong character, try again\n";
     }
