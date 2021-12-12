@@ -213,7 +213,7 @@ int main() {
     cout << "2:9 - keyboard letters                ------- ------- -------\n";
     cout << "  0 - ESC                            |   1   |   2   |   3   |\n";
     cout << "  * - next suggested word            |  ,.?! | a,b,c | d,e,f |\n";
-    cout << "  C - erase letter                    ------- ------- ------- \n";
+    cout << "  C - erase letter(to be implemented) ------- ------- ------- \n";
     cout << "  e - exit                           |   4   |   5   |   6   |\n";
     cout << "  c - clear search                   | g,h,i | j,k,l | m,n,o |\n";
     cout << "  v - view current words considered   ------- ------- -------\n";
@@ -282,7 +282,13 @@ int main() {
             print(suggested_words->begin(), suggested_words->end());
         }
         else if (typed_num == 'C') {
-            cout << "To be implemented\n";
+            //cout << "To be implemented\n";
+            //currently erasing last word
+            if(!phrase->empty())
+                phrase->pop_back();
+            characters_typed = 0;
+            cout << "         Phrase  : ";
+            print(phrase->begin(), phrase->end());
         }
         else if (typed_num == '1') {
             int i = 0;
