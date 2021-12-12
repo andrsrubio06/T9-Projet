@@ -9,6 +9,11 @@
 
 #include "trie.hpp"
 
+
+//change according to file that contains list of words and frequency
+#define FILENAME "wordsandfrequency.txt"
+
+
 using namespace std;
 
 //map of number typed to correspondant letters
@@ -109,7 +114,7 @@ void remove_intersection(vector<T>* c1, vector<T>* c2) {
 
 
 //for sorting in descending order
-struct comp {
+struct comp_desc {
     template<typename T>
     bool operator()(const T& l, const T& r) const {
         return l > r;
@@ -121,8 +126,8 @@ struct comp {
 //Returns vector of word suggestions, while changing the current_words vector
 vector<string>* suggestions(char typed_num, int* characters_typed, Trie* dictionary, vector<string>* current_words) {
     vector<pair<int, string>> suggested_pair;                        //vector of suggested words (where dictionary.search = 1)
-    vector<string>* suggested_words = new vector<string>;
-    vector<string>* added_words          = new vector<string>;       //vector of new words formed concatenating previous words with typed letter
+    vector<string>* suggested_words          = new vector<string>;
+    vector<string>* added_words              = new vector<string>;   //vector of new words formed concatenating previous words with typed letter
     vector<string>  old_current_words;                               //vector of old current words. Used after to eliminate previous of size < current size
                                                                      //        This ensures only words of size characters_typed will be suggested
 
@@ -135,10 +140,10 @@ vector<string>* suggestions(char typed_num, int* characters_typed, Trie* diction
             }
             else {
                 for (int it2 = 0; it2 < current_words->size(); ++it2) {           //for 2 or more letters added
-                    string test = current_words->at(it2);                         //'word'
-                    test.push_back(typed_chars[it]);                              //'word+typed_letter'
-                    //cout << "test = " << test << '\n';
-                    added_words->push_back(test);
+                    string temp = current_words->at(it2);                         //'word'
+                    temp.push_back(typed_chars[it]);                              //'word+typed_letter'
+                    //cout << "temp = " << temp << '\n';
+                    added_words->push_back(temp);
                 }
             }
         }
@@ -166,10 +171,10 @@ vector<string>* suggestions(char typed_num, int* characters_typed, Trie* diction
         //print(current_words->begin(), current_words->end());
 
 
-        sort(suggested_pair.begin(), suggested_pair.end(),comp());      //sorting in descending order
+        sort(suggested_pair.begin(), suggested_pair.end(),comp_desc());      //sorting in descending order
         for (int i = 0; i < suggested_pair.size(); i++) {
             //if (i >= 5)
-               // break;
+              //  break;
              suggested_words->push_back(suggested_pair[i].second);
         }
         
@@ -182,22 +187,26 @@ vector<string>* suggestions(char typed_num, int* characters_typed, Trie* diction
 int main() {
 
     Trie dictionary;
-    file_to_dictionary("wordsandfrequency.txt", &dictionary);
+    file_to_dictionary(FILENAME, &dictionary);
 
     vector<string>* current_words = new vector<string>;        //words that are a suggestion or a tree branch
     vector<string>* suggested_words = new vector<string>;      //words that are a suggestion
     vector<string>* phrase = new vector<string>;
     char typed_num;                                            //number typed by the user in the prompt line
     int characters_typed = 0;                                  //quantity of characters typed
+    int flag_two_esc = 0;                                      //used to identify if two ESCAPE ('0') were pressed. If true, it'll 
+                                                               //a dot ('.') in place
+    string ponctuation_marks[4] = { ",", ".", "!", "?"};
 
     cout << "\n--Suggested words mechanism--\n";
+    cout << "  1 - ,.!?\n";
     cout << "2:9 - keyboard letters\n";
+    cout << "  0 - ESC\n";
+    cout << "  * - next suggested word\n";
+    cout << "  C - erase letter\n";
     cout << "  e - exit\n";
     cout << "  c - clear search\n";
     cout << "  v - view current words considered\n";
-    cout << "  0 - word okay, go to next word\n";
-    cout << "  n - next suggested word\n";
-    cout << "  c - erase letter\n";
 
 
 
@@ -205,38 +214,86 @@ int main() {
         cout << "                 : ";
         cin >> typed_num;
 
+        if (typed_num != '0')
+            flag_two_esc = 0;
+
         if (typed_num == 'e') break;
         else if (typed_num == 'c') {
             current_words->clear();
+            phrase->clear();
             characters_typed = 0;
         }
         else if (typed_num == 'v') {
             cout << "Current words    : ";
             print(current_words->begin(), current_words->end());
         }
-        else if (typed_num >= '2' && typed_num <= '9') { //do assertion after : number from 2 - 9
+        else if (typed_num >= '2' && typed_num <= '9') {
             characters_typed++;
             suggested_words = suggestions(typed_num, &characters_typed, &dictionary, current_words);
             cout << "Suggested words  : ";
             print(suggested_words->begin(), suggested_words->end());
         }
         else if (typed_num == '0') {
-            //phrase->push_back("");
-            phrase->push_back(suggested_words->front());
-            current_words->clear();
-            characters_typed = 0;
-            cout << "         Phrase  : ";
-            print(phrase->begin(), phrase->end());
+            if (flag_two_esc) {
+                phrase->push_back(".");
+                cout << "         Phrase  : ";
+                print(phrase->begin(), phrase->end());
+            }
+            else {
+               if (phrase->empty() || phrase->back() == ".") {    //Begin of phrase or after '.' -> Upper case
+                    auto word_temp = suggested_words->front();
+                    word_temp[0] = toupper(word_temp[0]);
+                    suggested_words->front() = word_temp;
+                }
+                phrase->push_back(suggested_words->front());
+                current_words->clear();
+                characters_typed = 0;
+                cout << "         Phrase  : ";
+                print(phrase->begin(), phrase->end());
+                flag_two_esc = 1;
+            }
         }
-        else if (typed_num == 'n') {
+        else if (typed_num == '*') {
             string temp = suggested_words->front();
             suggested_words->erase(suggested_words->begin());
             suggested_words->push_back(temp);
             cout << "Suggested words  : ";
             print(suggested_words->begin(), suggested_words->end());
         }
-        else if (typed_num == 'c') {
-            cout << "Letter erased (to be implemented)\n";
+        else if (typed_num == 'C') {
+            if (characters_typed > 0) {
+                characters_typed--;
+                cout << "Current words    : ";
+                print(current_words->begin(), current_words->end());
+            }
+            cout << "Suggested words  : ";
+            print(suggested_words->begin(), suggested_words->end());
+        }
+        else if (typed_num == '1') {
+            int i = 0;
+            while (true) {
+                cout << "Ponctuation mark : " << ponctuation_marks[i] << "\n";
+                cin >> typed_num;
+                if (typed_num == '0') {
+                    phrase->push_back(ponctuation_marks[i]);
+                    break;
+                }
+                else if (typed_num == '1')
+                    i = (i + 1) % 4;
+            }
+
+
+            //while(true) {
+            //    int i = 0;
+            //    //wait for another '1' tapped until timeout
+            //    if (true /*timeout achieved*/) {
+            //        phrase->push_back(ponctuation_marks[i]);
+            //        break;
+            //    }
+            //    else i++;
+            //}
+            cout << "         Phrase  : ";
+            print(phrase->begin(), phrase->end());
         }
         else cout << "Wrong character, try again\n";
     }
