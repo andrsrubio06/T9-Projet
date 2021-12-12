@@ -1,12 +1,12 @@
-#include<map>
-#include<iostream>
-#include<string>
-#include<fstream>
-#include<sstream>
-#include<vector>
-#include<algorithm>
-#include<assert.h>
-# include <chrono>              //measure time to implement dictionary
+#include <map>
+#include <iostream>
+#include <string>
+#include <fstream>
+#include <sstream>
+#include <vector>
+#include <algorithm>           //for sorting vectors
+#include <assert.h>
+#include <chrono>              //measure time to implement dictionary
 
 #include "trie.hpp"
 
@@ -20,8 +20,6 @@ using namespace std;
 //map of number typed to correspondant letters
 const map<char, string> keys{ {'2', "abc"}, {'3', "def"}, {'4', "ghi"}, {'5',"jkl"},
         {'6', "mno"}, {'7', "pqrs"}, {'8',"tuv"}, {'9',"wxyz"} };
-
-
 //           KEYBOARD 
 //
 //   ------- ------- -------
@@ -44,20 +42,20 @@ const map<char, string> keys{ {'2', "abc"}, {'3', "def"}, {'4', "ghi"}, {'5',"jk
 
 
 
-
 //
 //Print on console vector content
 template <typename iteratorT>
-void print(iteratorT first, iteratorT end) {
+void print(iteratorT first, const iteratorT end) {
     for (; first != end; first++) {
         cout << *first << " ";
     }
     cout << "\n";
 }
 
+
 //
 //Convert file .csv,.txt to a trie implemented dictionary
-void file_to_dictionary(string filename, Trie* dict) {
+void file_to_dictionary(const string filename, Trie* dict) {
     ifstream infile;
     string new_word, frequency;
     infile.open(filename, ifstream::in);
@@ -87,6 +85,8 @@ void file_to_dictionary(string filename, Trie* dict) {
     */
 }
 
+
+
 //
 //Remove content of vector c2 in vector c1
 template<typename T>
@@ -94,21 +94,17 @@ void remove_intersection(vector<T>* c1, vector<T>* c2) {
     assert(c1 != nullptr);
     assert(c2 != nullptr);
 
-    sort(c1->begin(), end(*c1));  // O(n1 logn1)
-    sort(c2->begin(), end(*c2));  // O(n2 logn2)
+    sort(c1->begin(), c1->end());  // O(n1 logn1)
+    sort(c2->begin(), c2->end());  // O(n2 logn2)
 
     vector<T> difference1, difference2;
     difference1.reserve(c1->size());
     difference2.reserve(c2->size());
 
-    set_difference(begin(*c1), end(*c1),
-        begin(*c2), end(*c2),
-        back_inserter(difference1));
+    set_difference(c1->begin(), c1->end(),c2->begin(), c2->end(), back_inserter(difference1));
     // O(2*[N1 + N2 - 1])
 
-    set_difference(begin(*c2), end(*c2),
-        begin(*c1), end(*c1),
-        back_inserter(difference2));
+    set_difference(c2->begin(), c2->end(), c1->begin(), c1->end(), back_inserter(difference2));
     // O(2*[N1 + N2 - 1])
 
     *c1 = move(difference1);  // O(1)
@@ -116,8 +112,7 @@ void remove_intersection(vector<T>* c1, vector<T>* c2) {
 }
 
 
-
-
+//
 //for sorting in descending order
 struct comp_desc {
     template<typename T>
@@ -129,7 +124,7 @@ struct comp_desc {
 
 //
 //Returns vector of word suggestions, while changing the current_words vector
-vector<string>* suggestions(char typed_num, int* characters_typed, Trie* dictionary, vector<string>* current_words) {
+vector<string>* suggestions(const char typed_num, const int* characters_typed, Trie* dictionary, vector<string>* current_words) {
     vector<pair<int, string>> suggested_pair;                        //vector of suggested words (where dictionary.search = 1)
     vector<string>* suggested_words          = new vector<string>;
     vector<string>* added_words              = new vector<string>;   //vector of new words formed concatenating previous words with typed letter
@@ -178,12 +173,19 @@ vector<string>* suggestions(char typed_num, int* characters_typed, Trie* diction
 
         sort(suggested_pair.begin(), suggested_pair.end(),comp_desc());      //sorting in descending order
         for (int i = 0; i < suggested_pair.size(); i++) {
-            //if (i >= 5)
-              //  break;
              suggested_words->push_back(suggested_pair[i].second);
         }
         
         return suggested_words;
+}
+
+
+
+
+//
+//Clear one line of the console
+void Clear(){
+    cout << "\x1b[1F\x1b[2K";
 }
 
 
@@ -224,6 +226,8 @@ int main() {
         cout << "                 : ";
         cin >> typed_num;
 
+        Clear();
+
         if (typed_num != '0')
             flag_two_esc = 0;
 
@@ -249,13 +253,16 @@ int main() {
                 cout << "         Phrase  : ";
                 print(phrase->begin(), phrase->end());
             }
-            else {
-               if (phrase->empty() || phrase->back() == ".") {    //Begin of phrase or after '.' -> Upper case
-                    auto word_temp = suggested_words->front();
-                    word_temp[0] = toupper(word_temp[0]);
-                    suggested_words->front() = word_temp;
+            else {                                                 
+                if (!suggested_words->empty()) {                         //Assert there's at least one suggestion
+                    if (phrase->empty() || phrase->back() == "." ||      //Begin of phrase or after .?! -> Upper case
+                            phrase->back() == "?" || phrase->back() == "!") {
+                        auto word_temp = suggested_words->front();
+                        word_temp[0] = toupper(word_temp[0]);
+                        suggested_words->front() = word_temp;
+                    }
+                    phrase->push_back(suggested_words->front());
                 }
-                phrase->push_back(suggested_words->front());
                 current_words->clear();
                 characters_typed = 0;
                 cout << "         Phrase  : ";
@@ -271,13 +278,7 @@ int main() {
             print(suggested_words->begin(), suggested_words->end());
         }
         else if (typed_num == 'C') {
-            if (characters_typed > 0) {
-                characters_typed--;
-                cout << "Current words    : ";
-                print(current_words->begin(), current_words->end());
-            }
-            cout << "Suggested words  : ";
-            print(suggested_words->begin(), suggested_words->end());
+            cout << "To be implemented\n";
         }
         else if (typed_num == '1') {
             int i = 0;

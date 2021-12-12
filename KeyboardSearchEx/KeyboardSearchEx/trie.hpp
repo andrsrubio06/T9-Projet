@@ -4,14 +4,15 @@ using namespace std;
 // Define the character size  ||a to z|| => ||97 to 122||
 #define CHAR_SIZE 26                        //122 - 97 + 1
 
-class Trie
-{
-public:
+class Trie {
+
+private:
     bool isWord;
     Trie* character[CHAR_SIZE];
     int frequency;
 
-    // Constructor
+public:
+    //Constructors
     Trie() {
         this->isWord = false;
 
@@ -20,7 +21,7 @@ public:
 
         frequency = 0;
     }
-    Trie(int freq) {
+    Trie(const int freq) {
         this->isWord = false;
 
         for (int i = 0; i < CHAR_SIZE; i++)
@@ -28,19 +29,19 @@ public:
 
         frequency = freq;
     }
-    
 
+    //Methodes
+    void insert(const string, const int freq);
+    bool deletion(Trie*&, const string);
+    const int search(const string);
+    const bool haveChildren(Trie const*);
 
-    void insert(string, int freq);
-    bool deletion(Trie*&, string);
-    int search(string);
-    bool haveChildren(Trie const*);
 };
 
 
 
 // Iterative function to insert a word into a Trie
-void Trie::insert(string key, int freq) {
+void Trie::insert(const string key, const int freq) {
     // start from the root node
     Trie* curr = this;
     for (int i = 0; i < key.length(); i++)
@@ -57,11 +58,12 @@ void Trie::insert(string key, int freq) {
 
 
 
-// Iterative function to search a word in a Trie. It returns true
-// if the key is found in the Trie; otherwise, it returns false
-//alteracao : -1 ->nao ta na trie, 0->ta na arvore mas n é palavra,1->é palavra sugerida
-int Trie::search(string key) {
-    // return false if Trie is empty
+// Iterative function to search a word in a Trie
+//returns: -1 ->not in the trie,
+//          0 ->in the trie but not a word,
+//       freq ->word in the trie
+const int Trie::search(const string key) {
+    // return -1 if Trie is empty
     if (this == nullptr)
         return -1;
 
@@ -75,7 +77,7 @@ int Trie::search(string key) {
             return -1;
     }
 
-    // return true if the current node is a leaf and the
+    // return freq if the current node is a leaf and the
     // end of the string is reached
     if (curr->isWord)
         return curr->frequency;
@@ -85,7 +87,7 @@ int Trie::search(string key) {
 
 
 // Returns true if a given node has any children
-bool Trie::haveChildren(Trie const* curr) {
+const bool Trie::haveChildren(Trie const* curr) {
     for (int i = 0; i < CHAR_SIZE; i++) {
         if (curr->character[i])
             return true;    // child found
@@ -94,7 +96,7 @@ bool Trie::haveChildren(Trie const* curr) {
 }
 
 // Recursive function to delete a key in the Trie
-bool Trie::deletion(Trie*& curr, string key) {
+bool Trie::deletion(Trie*& curr, const string key) {
     // return if Trie is empty
     if (curr == nullptr)
         return false;
