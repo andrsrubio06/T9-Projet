@@ -8,6 +8,8 @@
 #include <assert.h>
 #include <chrono>              //measure time to implement dictionary
 
+#include <conio.h>
+
 #include "trie.hpp"
 
 
@@ -224,24 +226,26 @@ int main() {
 
     while(true) {
         cout << "                 : ";
-        cin >> typed_num;
+        typed_num = _getch();
 
         Clear();
 
-        if (typed_num != '0')
-            flag_two_esc = 0;
+        //if (typed_num )
+            //flag_two_esc = 0;
 
         if (typed_num == 'e') break;
         else if (typed_num == 'c') {
             current_words->clear();
             phrase->clear();
             characters_typed = 0;
+            cout << "\n"; //for Clear();
         }
         else if (typed_num == 'v') {
             cout << "Current words    : ";
             print(current_words->begin(), current_words->end());
         }
         else if (typed_num >= '2' && typed_num <= '9') {
+            flag_two_esc = 0;
             characters_typed++;
             suggested_words = suggestions(typed_num, &characters_typed, &dictionary, current_words);
             cout << "Suggested words  : ";
@@ -284,7 +288,8 @@ int main() {
             int i = 0;
             while (true) {
                 cout << "Ponctuation mark : " << ponctuation_marks[i] << "\n";
-                cin >> typed_num;
+                typed_num = _getch();
+                Clear();
                 if (typed_num == '0') {
                     phrase->push_back(ponctuation_marks[i]);
                     break;
