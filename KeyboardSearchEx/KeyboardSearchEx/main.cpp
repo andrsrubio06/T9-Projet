@@ -6,6 +6,7 @@
 #include<vector>
 #include<algorithm>
 #include<assert.h>
+# include <chrono>              //measure time to implement dictionary
 
 #include "trie.hpp"
 
@@ -61,17 +62,21 @@ void file_to_dictionary(string filename, Trie* dict) {
     string new_word, frequency;
     infile.open(filename, ifstream::in);
     if (infile.is_open()) {
+        std::chrono::time_point<std::chrono::system_clock> start, end;
+        start = std::chrono::system_clock::now();
         while (infile.good()) {
             getline(infile, new_word, ',');
             getline(infile, frequency, '\n');
             dict->insert(new_word, stoi(frequency));
             //cout << "word added = "<<new_word<<" Frequency = "<<stoi(frequency)<<"\n";
-            //cout << "Tamanhos = " << new_word.length() << " e " << frequency.length() << "\n";
         }
+        end = std::chrono::system_clock::now();
+        std::chrono::duration<double> elapsed_seconds = end - start;
         infile.close();
+        cout << "\nDictionary implemented!\n";
+        std::cout << "Dictionary construction time : " << elapsed_seconds.count() << " seconds"<<std::endl;
     }
     else cout << "Error opening file";
-    cout << "\nDictionary implemented!\n";
 
     /*cout << "Search Test:\n";
     cout << "a = " << dict->search("a") << "\n";
@@ -198,17 +203,22 @@ int main() {
                                                                //a dot ('.') in place
     string ponctuation_marks[4] = { ",", ".", "!", "?"};
 
-    cout << "\n--Suggested words mechanism--\n";
-    cout << "  1 - ,.!?\n";
-    cout << "2:9 - keyboard letters\n";
-    cout << "  0 - ESC\n";
-    cout << "  * - next suggested word\n";
-    cout << "  C - erase letter\n";
-    cout << "  e - exit\n";
-    cout << "  c - clear search\n";
-    cout << "  v - view current words considered\n";
-
-
+    cout << "\n------SUGGESTED WORDS MECHANISM------ ------- ------- -------\n";
+    cout << "                                     |       |       |       |\n";
+    cout << "  1 - ,.!?                           |   C   |   <-  |   ->  |\n";
+    cout << "2:9 - keyboard letters                ------- ------- -------\n";
+    cout << "  0 - ESC                            |   1   |   2   |   3   |\n";
+    cout << "  * - next suggested word            |  ,.?! | a,b,c | d,e,f |\n";
+    cout << "  C - erase letter                    ------- ------- ------- \n";
+    cout << "  e - exit                           |   4   |   5   |   6   |\n";
+    cout << "  c - clear search                   | g,h,i | j,k,l | m,n,o |\n";
+    cout << "  v - view current words considered   ------- ------- -------\n";
+    cout << "  # : Upper/lower case               |   7   |   8   |   9   |\n";
+    cout << "                                     |p,q,r,s| t,u,v |w,x,y,z|\n";
+    cout << "                                      ------- ------- -------\n";
+    cout << "                                     |   *   |   0   |   #   |\n";
+    cout << "                                     |       |  ESC  |       |\n";
+    cout << " ------------------------------------ ------- ------- -------\n\n";
 
     while(true) {
         cout << "                 : ";
@@ -281,19 +291,17 @@ int main() {
                 else if (typed_num == '1')
                     i = (i + 1) % 4;
             }
-
-
-            //while(true) {
-            //    int i = 0;
-            //    //wait for another '1' tapped until timeout
-            //    if (true /*timeout achieved*/) {
-            //        phrase->push_back(ponctuation_marks[i]);
-            //        break;
-            //    }
-            //    else i++;
-            //}
             cout << "         Phrase  : ";
             print(phrase->begin(), phrase->end());
+        }
+        else if (typed_num == '#') {
+            auto word_temp = suggested_words->front();
+            if (word_temp[0] > 96)                       // ASCII > 96 => lower case
+                word_temp[0] = toupper(word_temp[0]);    
+            else word_temp[0] = tolower(word_temp[0]);
+            suggested_words->front() = word_temp;
+            cout << "Suggested words  : ";
+            print(suggested_words->begin(), suggested_words->end());
         }
         else cout << "Wrong character, try again\n";
     }
