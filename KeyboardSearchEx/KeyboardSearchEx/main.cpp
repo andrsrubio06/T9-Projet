@@ -168,26 +168,6 @@ string word_to_chars(string word) {
             nums = nums + 8;
         else nums = nums + 9;
     }
-    /*
-    for (i = 0; i < word.size(); i++) {
-        if (word[i] == 'a' || word[i] == 'b' || word[i] == 'c')
-            nums.push_back(2);
-        else if (word[i] == 'd' || word[i] == 'e' || word[i] == 'f')
-            nums.push_back(3);
-        else if (word[i] == 'g' || word[i] == 'h' || word[i] == 'i')
-            nums.push_back(4);
-        else if (word[i] == 'j' || word[i] == 'k' || word[i] == 'l')
-            nums.push_back(5);
-        else if (word[i] == 'm' || word[i] == 'n' || word[i] == 'o')
-            nums.push_back(6);
-        else if (word[i] == 'p' || word[i] == 'q' || word[i] == 'r' || word[i] == 's')
-            nums.push_back(7);
-        else if (word[i] == 't' || word[i] == 'u' || word[i] == 'v')
-            nums.push_back(8);
-        else nums.push_back(9);   
-    }
-    */
-
     return to_string(nums);
 }
 
@@ -278,7 +258,7 @@ void suggestions_from_erase(unsigned *characters_typed, Trie* dictionary, vector
 
 }
 
-void add_word_multitap(vector<string>* phrase) {
+void add_word_multitap(vector<string>* phrase, Trie *dictionary) {
 
     string new_word = {};
     string typed_chars;
@@ -292,13 +272,15 @@ void add_word_multitap(vector<string>* phrase) {
         Clear_line();
         if (typed_num == '0') {
             phrase->push_back(new_word);
-            //ADD TO THE FILE, with frequency 100
-            ofstream myfile;
-            myfile.open(FILENAME, ios_base::app | ios_base::out);
-            myfile << new_word << ",100\n";
-            myfile.close();
-            cout << "         Phrase  : ";
-            print(phrase->begin(), phrase->end());
+            //ADD TO THE FILE, with frequency 100, if not in dictionary
+            if (dictionary->search(new_word) < 1) {
+                dictionary->insert(new_word, 100);
+                ofstream myfile;
+                myfile.open(FILENAME, ios_base::app | ios_base::out);
+                myfile << new_word << ",100\n";
+                myfile.close();
+            }
+            else cout << "Word already in dictionary\n";
             break;
         }
         else if (typed_num >= '2' && typed_num <= '9') {
@@ -332,26 +314,30 @@ void add_word_multitap(vector<string>* phrase) {
 void add_ponctuation_mark(vector<string>* phrase, string* ponctuation_marks) {
     int i = 0;
     char typed_num;
+    phrase->push_back(ponctuation_marks[i]);
     while (true) {
-        cout << "Ponctuation mark : " << ponctuation_marks[i] << "\n";
+        //cout << "Ponctuation mark : " << ponctuation_marks[i] << "\n";
+        cout << "         Phrase  : ";
+        print(phrase->begin(), phrase->end());
         typed_num = _getch();
         Clear_line();
-        if (typed_num == '0') {
-            phrase->push_back(ponctuation_marks[i]);
+        if (typed_num == '0' || (typed_num >= '2' && typed_num <= '9')) {
             break;
         }
-        else if (typed_num == '1')
+        else if (typed_num == '1') {
             i = (i + 1) % 4;
+            phrase->pop_back();
+            phrase->push_back(ponctuation_marks[i]);
+        }
+
     }
 }
 
-void upper_lower_suggested(vector<string>* suggested_words) {
-    if (!suggested_words->empty()) {
-        auto word_temp = suggested_words->front();
-        if (word_temp[0] > 96)                       // ASCII > 96 => lower case
-            word_temp[0] = toupper(word_temp[0]);
-        else word_temp[0] = tolower(word_temp[0]);
-        suggested_words->front() = word_temp;
+void upper_lower(string &word) {
+    if (!word.empty()) {
+        if (word[0] > 96)                       // ASCII > 96 => lower case
+            word[0] = toupper(word[0]);
+        else word[0] = tolower(word[0]);
     }
 }
 
@@ -422,7 +408,8 @@ int main() {
             current_words->clear();
             phrase->clear();
             characters_typed = 0;
-            cout << "\n"; //for Clear_line();
+            cout << "         Phrase  : ";
+            print(phrase->begin(), phrase->end());
         }
 
         else if (typed_num == 'v') { //View current words
@@ -431,46 +418,51 @@ int main() {
         }
 
         else if (typed_num >= '2' && typed_num <= '9') {
-            flag_two_esc = 0;
             characters_typed = concatenate(characters_typed,typed_num - 48);
             suggested_words = suggestions(typed_num, &characters_typed, &dictionary, current_words);
-            cout << "Suggested words  : ";
-            print(suggested_words->begin(), suggested_words->end());
-        }
-        else if (typed_num == '0') {
-            if (flag_two_esc) {
-                phrase->push_back(".");
-                cout << "         Phrase  : ";
-                print(phrase->begin(), phrase->end());
-            }
-            else {                                                 
+
+                if(!phrase->empty() && !flag_two_esc) phrase->pop_back();
+
                 if (!suggested_words->empty()) {                         //Assert there's at least one suggestion
                     if (phrase->empty() || phrase->back() == "." ||      //Begin of phrase or after .?! -> Upper case
-                            phrase->back() == "?" || phrase->back() == "!") {
+                        phrase->back() == "?" || phrase->back() == "!") {
+
                         auto word_temp = suggested_words->front();
                         word_temp[0] = toupper(word_temp[0]);
                         suggested_words->front() = word_temp;
                     }
                     phrase->push_back(suggested_words->front());
                 }
+            
+            cout << "         Phrase  : ";
+            print(phrase->begin(), phrase->end());
+            flag_two_esc = 0;
+        }
+        else if (typed_num == '0') {
+            if (flag_two_esc) {
+                phrase->push_back(".");
+            }
+            else {                                                 
                 current_words->clear();
                 suggested_words->clear();
                 characters_typed = 0;
-                cout << "         Phrase  : ";
-                print(phrase->begin(), phrase->end());
                 flag_two_esc = 1;
             }
+            cout << "         Phrase  : ";
+            print(phrase->begin(), phrase->end());
         }
 
         else if (typed_num == '*') {
-            rotate_suggestions(suggested_words);
-            cout << "Suggested words  : ";
-            print(suggested_words->begin(), suggested_words->end());
+            if (!suggested_words->empty()) {
+                rotate_suggestions(suggested_words);
+                phrase->pop_back();
+                phrase->push_back(suggested_words->front());
+            }
+            cout << "         Phrase  : ";
+            print(phrase->begin(), phrase->end());
         }
 
         else if (typed_num == 'C') {
-            //cout << "To be implemented\n";
-
             if (!phrase->empty()) {
                 //if last words size 1 -> delete last word in phrase
                 if (phrase->back().size() <= 1) {
@@ -480,61 +472,50 @@ int main() {
                     phrase->back().pop_back();
                 }
                 //if middle/end of words -> show last suggestions
-                //func suggestions_from_erase()
                 else {  //solution not optimized
                     string last_word = phrase->back();
                     string num_last_word = word_to_chars(last_word);
                     vector<string>* loc_current_words = new vector<string>;
                     vector<string>* loc_suggested_words = new vector<string>;
+                    characters_typed = 0;
                     for (int i = 0; i < last_word.size() - 1; i++) {
                         typed_num = num_last_word[i];
                         characters_typed = concatenate(characters_typed, typed_num - 48);
                         loc_suggested_words = suggestions(typed_num, &characters_typed, &dictionary, loc_current_words);
                     }
                     suggested_words = loc_suggested_words;
-                    cout << "Suggested words  : ";
-                    print(suggested_words->begin(), suggested_words->end());
+                    current_words = loc_current_words;
 
-
-                        /*
-                        string str = to_string(characters_typed);
-                        vector<int> intArray;
-                        for (auto c : str)
-                            intArray.push_back(c - '0');
-
-                        print(intArray.begin(), intArray.end());
-                        vector<string>* current_words_local = new vector<string>;
-                        vector<string>* suggested_words_local = new vector<string>;
-                        unsigned teste = 5;*/
-                        //for (int i = intArray.size() - 1; i >= 0; i--) {
-                            //suggested_words_local = suggestions(intArray[0], &teste, dictionary, current_words_local);
-                        // print(suggested_words_local->begin(), suggested_words_local->end());
-                       // }
-
+                    if (!suggested_words->empty()) {
+                        phrase->pop_back();
+                        phrase->push_back(suggested_words->front());
+                    }
+                    else {
+                        phrase->back().pop_back();
+                    }
                 }
             }
 
             cout << "         Phrase  : ";
             print(phrase->begin(), phrase->end());
-            /*if (!phrase->empty())
-                phrase->pop_back();
-            characters_typed = 0;
-            cout << "         Phrase  : ";
-            print(phrase->begin(), phrase->end());*/
         }
 
         else if (typed_num == '1') {
-            add_ponctuation_mark(phrase, ponctuation_marks);
             current_words->clear();
+            suggested_words->clear();
             characters_typed = 0;
+            flag_two_esc = 1;
+            add_ponctuation_mark(phrase, ponctuation_marks);
             cout << "         Phrase  : ";
             print(phrase->begin(), phrase->end());
         }
 
         else if (typed_num == '#') {
-            upper_lower_suggested(suggested_words);
-            cout << "Suggested words  : ";
-            print(suggested_words->begin(), suggested_words->end());
+            if (!phrase->empty()) {
+                upper_lower(phrase->back());
+            }
+            cout << "         Phrase  : ";
+            print(phrase->begin(), phrase->end());
         }
 
         else if (typed_num == 'n') {
@@ -546,7 +527,14 @@ int main() {
         }
 
         else if (typed_num == 'a') {                    //conventional multitap keyboard
-            add_word_multitap(phrase);
+            add_word_multitap(phrase, &dictionary);
+            current_words->clear();
+            suggested_words->clear();
+            characters_typed = 0;
+            flag_two_esc = 1;
+
+            cout << "         Phrase  : ";
+            print(phrase->begin(), phrase->end());
         }
 
         else cout << "Wrong character, try again\n";
