@@ -174,7 +174,7 @@ string word_to_chars(string word) {
 
 //
 //Returns vector of word suggestions, while changing the current_words vector
-vector<string>* suggestions(const char typed_num, const unsigned* characters_typed, Trie* dictionary, vector<string>* current_words) {
+vector<string>* suggestions(const char typed_num, const unsigned* characters_typed, Trie* dictionary, vector<string>*current_words) {
     vector<pair<int, string>> suggested_pair;                        //vector of suggested words (where dictionary.search = 1)
     vector<string>* suggested_words          = new vector<string>;
     vector<string>* added_words              = new vector<string>;   //vector of new words formed concatenating previous words with typed letter
@@ -228,34 +228,19 @@ vector<string>* suggestions(const char typed_num, const unsigned* characters_typ
         return suggested_words;
 }
 
-void suggestions_from_erase(unsigned *characters_typed, Trie* dictionary, vector<string>* current_words) {
-    unsigned number_of_digits = 0;
-    int aux = *characters_typed;
-    while (aux != 0) {
-        aux /= 10; 
-        number_of_digits++;
-    }
-    
-    if (number_of_digits) {
-        *characters_typed = *characters_typed / 10;
-        cout << "Apagou:" << characters_typed << "\n";
+vector<string>* suggestions_from_erase(unsigned *characters_typed, string num_last_word, Trie* dictionary, vector<string>* current_words) {
+    vector<string>* loc_suggested_words = new vector<string>;
+    current_words->clear();
+    *characters_typed = 0;
+    char typed_num;
 
-        string str = to_string(*characters_typed);
-        vector<int> intArray;
-        for (auto c : str) 
-            intArray.push_back(c - '0');
-
-        print(intArray.begin(), intArray.end());
-        vector<string>* current_words_local = new vector<string>;
-        vector<string>* suggested_words_local = new vector<string>;
-        unsigned teste = 5;
-        //for (int i = intArray.size() - 1; i >= 0; i--) {
-            //suggested_words_local = suggestions(intArray[0], &teste, dictionary, current_words_local);
-        // print(suggested_words_local->begin(), suggested_words_local->end());
-       // }
+    for (int i = 0; i < num_last_word.size() - 1; i++) {
+        typed_num = num_last_word[i];
+        *characters_typed = concatenate(*characters_typed, typed_num - 48);
+        loc_suggested_words = suggestions(typed_num, characters_typed, dictionary, current_words);
     }
 
-
+    return loc_suggested_words;
 }
 
 void add_word_multitap(vector<string>* phrase, Trie *dictionary) {
@@ -303,8 +288,12 @@ void add_word_multitap(vector<string>* phrase, Trie *dictionary) {
             cout << "    Add new word : " << new_word << "\n";
             typed_num = _getch();
         }
-        else {
-            cout << "Wrong character, try again\n";
+        else if (typed_num == '1') {
+            cout << "    Add new word : " << new_word << "\n";
+            typed_num = _getch();
+        
+        }
+        else{    cout << "Wrong character, try again\n";
             typed_num = _getch();
         }
     }
@@ -398,9 +387,17 @@ int main() {
     cout << " ------------------------------------ ------- ------- -------\n\n";
 
     while(true) {
-        cout << "                 : ";
+        if (characters_typed > 0) {
+            cout << "Suggested words  : ";
+            print(suggested_words->begin(), suggested_words->end());
+            cout << "\x1b[1F";
+        }
+        else {
+            cout << "                 : ";
+        }
         typed_num = _getch();
         Clear_line();
+        
 
         if (typed_num == 'e') break;
 
@@ -473,19 +470,10 @@ int main() {
                 }
                 //if middle/end of words -> show last suggestions
                 else {  //solution not optimized
-                    string last_word = phrase->back();
-                    string num_last_word = word_to_chars(last_word);
-                    vector<string>* loc_current_words = new vector<string>;
-                    vector<string>* loc_suggested_words = new vector<string>;
-                    characters_typed = 0;
-                    for (int i = 0; i < last_word.size() - 1; i++) {
-                        typed_num = num_last_word[i];
-                        characters_typed = concatenate(characters_typed, typed_num - 48);
-                        loc_suggested_words = suggestions(typed_num, &characters_typed, &dictionary, loc_current_words);
-                    }
-                    suggested_words = loc_suggested_words;
-                    current_words = loc_current_words;
-
+                    //string last_word = phrase->back();
+                    string num_last_word = word_to_chars(phrase->back());
+                    
+                    suggested_words = suggestions_from_erase(&characters_typed, num_last_word, &dictionary, current_words);
                     if (!suggested_words->empty()) {
                         phrase->pop_back();
                         phrase->push_back(suggested_words->front());
