@@ -9,9 +9,7 @@
 #include <chrono>              //measure time to implement dictionary
 #include <conio.h>
 
-
 #include "trie.hpp"
-
 
 //change according to file that contains list of words and frequency
 #define FILENAME "wordsandfrequency.txt"
@@ -21,7 +19,7 @@
                                 // - have a table of data structure that stores words and frequency, update that table
                                 //   and fro time to time upload the changes in the file (too expensive in memory)
 
-
+#define SIZE_SCREEN 30
 using namespace std;
 
 //map of number typed to correspondant letters
@@ -57,10 +55,13 @@ void cursor_goto(int x, int y) {
 
 //
 //Print on console vector content
-template <typename iteratorT>
-void print(iteratorT first, const iteratorT end) {
+//template <typename iteratorT>
+void print(vector<string>::iterator first, vector<string>::iterator end) {
+    int line_size = 0;
     for (; first != end; first++) {
         cout << *first << " ";
+        //line_size += first->size()+1;
+        //if (line_size > SIZE_SCREEN) cout << "\n";
     }
     cout << "\n";
 }
@@ -261,12 +262,13 @@ void add_word_multitap(vector<string>* phrase, Trie *dictionary) {
     char typed_num;
     char old_typed_num = '0';
 
-    cout << "    Add new word : " << new_word << "\n";
-    cursor_goto(20 + new_word.size(), 24);
+    cursor_goto(0, 27);
+    cout << "    Add new word : " << new_word;
+    //cursor_goto(20 + new_word.size(), 27);
     typed_num = _getch();
 
     while (true) {
-        cursor_goto(20, 24);
+        cursor_goto(20, 27);
         printf("\33[2K\r");
         if (typed_num == '0') {
             phrase->push_back(new_word);
@@ -288,7 +290,7 @@ void add_word_multitap(vector<string>* phrase, Trie *dictionary) {
             int it = 0;
             while (typed_num == old_typed_num) {
                 cout << "    Add new word : " << new_word << typed_chars[it] << "\n";
-                cursor_goto(20 + new_word.size(), 24);
+                cursor_goto(20 + new_word.size(), 27);
                 typed_num = _getch();
                 printf("\33[2K\r");
                 if (typed_num == old_typed_num)
@@ -302,17 +304,17 @@ void add_word_multitap(vector<string>* phrase, Trie *dictionary) {
             if (!new_word.empty())
                 new_word.pop_back();
             cout << "    Add new word : " << new_word << "\n";
-            cursor_goto(20 + new_word.size(), 24);
+            cursor_goto(20 + new_word.size(), 27);
             typed_num = _getch();
         }
         else if (typed_num == '1') {
             cout << "    Add new word : " << new_word << "\n";
-            cursor_goto(20 + new_word.size(), 24);
+            cursor_goto(20 + new_word.size(), 27);
             typed_num = _getch();
         
         }
         else{    cout << "Wrong character, try again\n";
-            cursor_goto(20 + new_word.size(), 24);
+            cursor_goto(20 + new_word.size(), 27);
             typed_num = _getch();
         }
     }
@@ -328,6 +330,7 @@ void add_ponctuation_mark(vector<string>* phrase, string* ponctuation_marks) {
         cursor_goto(0,23);
         cout << "         Phrase  : ";
         print(phrase->begin(), phrase->end());
+        cursor_goto(20 + phrase_length, 23 + number_of_lines);
         typed_num = _getch();
         Clear_line();
         if (typed_num == '0' || (typed_num >= '2' && typed_num <= '9')) {
@@ -363,7 +366,7 @@ void add_number(vector<string>* phrase) {
     char typed_num;
     while (true) {
         cout << "   Number format : " << numbers << "\n";
-        cursor_goto(20 + numbers.size(), 24);
+        cursor_goto(20 + numbers.size(), 27);
         typed_num = _getch();
         phrase_length++;
         printf("\33[2K\r");
@@ -412,23 +415,25 @@ int main() {
 
     while(true) {
         cursor_goto(0, 23);
-        printf("\33[2K\n\33[2K");
+        printf("\33[2K\n\33[2K\n\33[2K\n\33[2K\n\33[2K\n\33[2K"); //Clear console, 6 lines
         cursor_goto(0, 23);
         cout << "         Phrase  : ";
         print(phrase->begin(), phrase->end());
 
         if (characters_typed > 0) {
+            cursor_goto(0, 27);
             cout << "Suggested words  : ";
             print(suggested_words->begin(), suggested_words->end());
             //cout << "\x1b[1F";
         }
         else {
+            cursor_goto(0, 27);
             cout << "                 : ";
         }
-        if (phrase_length > 20) {
-            phrase_length = 0;
-            number_of_lines++;
-        }
+        //if (phrase_length > SIZE_SCREEN) {
+        //    phrase_length = 0;
+        //    number_of_lines++;
+        //}
         cursor_goto(20 + phrase_length, 23+number_of_lines);
         typed_num = _getch();
         cursor_goto(0, 24+number_of_lines);
@@ -501,6 +506,7 @@ int main() {
                 if (phrase->back().size() <= 1) {
                     phrase->pop_back();
                     suggested_words->clear();
+                    if (phrase_length > 0) phrase_length--;    //because of escape
                 }
                 //else if (isdigit(phrase->back().back())) { //last words is a number
                     //phrase->back().pop_back();
@@ -529,8 +535,9 @@ int main() {
             suggested_words->clear();
             characters_typed = 0;
             flag_two_esc = 1;
-            add_ponctuation_mark(phrase, ponctuation_marks);
             phrase_length+=2;
+            add_ponctuation_mark(phrase, ponctuation_marks);
+            //phrase_length++;
         }
 
         else if (typed_num == '#') {
