@@ -48,6 +48,12 @@ const map<char, string> keys{ {'2', "abc"}, {'3', "def"}, {'4', "ghi"}, {'5',"jk
 //
 
 
+unsigned phrase_length = 0;
+unsigned number_of_lines = 0;
+
+void cursor_goto(int x, int y) {
+    printf("%c[%d;%df", 0x1B, y, x);
+}
 
 //
 //Print on console vector content
@@ -148,7 +154,12 @@ string word_to_chars(string word) {
     int i = 0;
     int wsize = word.size();
     int nums = 0;
-    word[0] = tolower(word[0]);
+    word[0] = tolower(word[0]);  //only works with lower case
+
+    if (word[0] >= '0' && word[0] <= '9') { //it's a number
+
+        return word;
+    }
 
     for (i = 0; i < word.size(); i++) {
         nums = nums * 10;
@@ -251,10 +262,12 @@ void add_word_multitap(vector<string>* phrase, Trie *dictionary) {
     char old_typed_num = '0';
 
     cout << "    Add new word : " << new_word << "\n";
+    cursor_goto(20 + new_word.size(), 24);
     typed_num = _getch();
 
     while (true) {
-        Clear_line();
+        cursor_goto(20, 24);
+        printf("\33[2K\r");
         if (typed_num == '0') {
             phrase->push_back(new_word);
             //ADD TO THE FILE, with frequency 100, if not in dictionary
@@ -266,6 +279,7 @@ void add_word_multitap(vector<string>* phrase, Trie *dictionary) {
                 myfile.close();
             }
             else cout << "Word already in dictionary\n";
+            phrase_length++;
             break;
         }
         else if (typed_num >= '2' && typed_num <= '9') {
@@ -274,26 +288,31 @@ void add_word_multitap(vector<string>* phrase, Trie *dictionary) {
             int it = 0;
             while (typed_num == old_typed_num) {
                 cout << "    Add new word : " << new_word << typed_chars[it] << "\n";
+                cursor_goto(20 + new_word.size(), 24);
                 typed_num = _getch();
-                Clear_line();
+                printf("\33[2K\r");
                 if (typed_num == old_typed_num)
                     it = (it + 1) % typed_chars.length();
             }
             cout << "\n"; //for Clear_line();
             new_word.push_back(typed_chars[it]);
+            phrase_length++;
         }
         else if (typed_num == 'C') {
             if (!new_word.empty())
                 new_word.pop_back();
             cout << "    Add new word : " << new_word << "\n";
+            cursor_goto(20 + new_word.size(), 24);
             typed_num = _getch();
         }
         else if (typed_num == '1') {
             cout << "    Add new word : " << new_word << "\n";
+            cursor_goto(20 + new_word.size(), 24);
             typed_num = _getch();
         
         }
         else{    cout << "Wrong character, try again\n";
+            cursor_goto(20 + new_word.size(), 24);
             typed_num = _getch();
         }
     }
@@ -306,6 +325,7 @@ void add_ponctuation_mark(vector<string>* phrase, string* ponctuation_marks) {
     phrase->push_back(ponctuation_marks[i]);
     while (true) {
         //cout << "Ponctuation mark : " << ponctuation_marks[i] << "\n";
+        cursor_goto(0,23);
         cout << "         Phrase  : ";
         print(phrase->begin(), phrase->end());
         typed_num = _getch();
@@ -342,10 +362,12 @@ void add_number(vector<string>* phrase) {
     string numbers = {};
     char typed_num;
     while (true) {
-        cout << "Number format : " << numbers << "\n";
+        cout << "   Number format : " << numbers << "\n";
+        cursor_goto(20 + numbers.size(), 24);
         typed_num = _getch();
-        Clear_line();
-        if (typed_num == '0') {
+        phrase_length++;
+        printf("\33[2K\r");
+        if (typed_num == '0' || typed_num == 'e') {
             phrase->push_back(numbers);
             break;
         }
@@ -353,6 +375,7 @@ void add_number(vector<string>* phrase) {
             numbers = numbers + to_string(typed_num - 48);
     }
 }
+
 
 int main() {
 
@@ -367,6 +390,7 @@ int main() {
     int flag_two_esc = 0;                                      //used to identify if two ESCAPE ('0') were pressed. If true, it'll 
                                                                //a dot ('.') in place
     string ponctuation_marks[4] = { ",", ".", "!", "?"};
+
 
 
     cout << "\n------SUGGESTED WORDS MECHANISM------ ------- ------- -------\n";
@@ -387,16 +411,27 @@ int main() {
     cout << " ------------------------------------ ------- ------- -------\n\n";
 
     while(true) {
+        cursor_goto(0, 23);
+        printf("\33[2K\n\33[2K");
+        cursor_goto(0, 23);
+        cout << "         Phrase  : ";
+        print(phrase->begin(), phrase->end());
+
         if (characters_typed > 0) {
             cout << "Suggested words  : ";
             print(suggested_words->begin(), suggested_words->end());
-            cout << "\x1b[1F";
+            //cout << "\x1b[1F";
         }
         else {
             cout << "                 : ";
         }
+        if (phrase_length > 20) {
+            phrase_length = 0;
+            number_of_lines++;
+        }
+        cursor_goto(20 + phrase_length, 23+number_of_lines);
         typed_num = _getch();
-        Clear_line();
+        cursor_goto(0, 24+number_of_lines);
         
 
         if (typed_num == 'e') break;
@@ -405,8 +440,7 @@ int main() {
             current_words->clear();
             phrase->clear();
             characters_typed = 0;
-            cout << "         Phrase  : ";
-            print(phrase->begin(), phrase->end());
+            phrase_length = 0;
         }
 
         else if (typed_num == 'v') { //View current words
@@ -424,20 +458,25 @@ int main() {
                     if (phrase->empty() || phrase->back() == "." ||      //Begin of phrase or after .?! -> Upper case
                         phrase->back() == "?" || phrase->back() == "!") {
 
-                        auto word_temp = suggested_words->front();
-                        word_temp[0] = toupper(word_temp[0]);
-                        suggested_words->front() = word_temp;
+                        for (int i = 0; i < suggested_words->size(); i++) {
+                            auto word_temp = suggested_words->at(i);
+                            word_temp[0] = toupper(word_temp[0]);
+                            suggested_words->at(i) = word_temp;
+                        }
                     }
                     phrase->push_back(suggested_words->front());
                 }
+                else {
+                    phrase->push_back(to_string(characters_typed));
+                }
             
-            cout << "         Phrase  : ";
-            print(phrase->begin(), phrase->end());
             flag_two_esc = 0;
+            phrase_length++;
         }
         else if (typed_num == '0') {
             if (flag_two_esc) {
                 phrase->push_back(".");
+                phrase_length++;
             }
             else {                                                 
                 current_words->clear();
@@ -445,8 +484,7 @@ int main() {
                 characters_typed = 0;
                 flag_two_esc = 1;
             }
-            cout << "         Phrase  : ";
-            print(phrase->begin(), phrase->end());
+            phrase_length++;
         }
 
         else if (typed_num == '*') {
@@ -455,8 +493,6 @@ int main() {
                 phrase->pop_back();
                 phrase->push_back(suggested_words->front());
             }
-            cout << "         Phrase  : ";
-            print(phrase->begin(), phrase->end());
         }
 
         else if (typed_num == 'C') {
@@ -464,10 +500,11 @@ int main() {
                 //if last words size 1 -> delete last word in phrase
                 if (phrase->back().size() <= 1) {
                     phrase->pop_back();
+                    suggested_words->clear();
                 }
-                else if (isdigit(phrase->back().back())) { //last words is a number
-                    phrase->back().pop_back();
-                }
+                //else if (isdigit(phrase->back().back())) { //last words is a number
+                    //phrase->back().pop_back();
+               // }
                 //if middle/end of words -> show last suggestions
                 else {  //solution not optimized
                     //string last_word = phrase->back();
@@ -483,9 +520,8 @@ int main() {
                     }
                 }
             }
+            if(phrase_length>0) phrase_length--;
 
-            cout << "         Phrase  : ";
-            print(phrase->begin(), phrase->end());
         }
 
         else if (typed_num == '1') {
@@ -494,24 +530,20 @@ int main() {
             characters_typed = 0;
             flag_two_esc = 1;
             add_ponctuation_mark(phrase, ponctuation_marks);
-            cout << "         Phrase  : ";
-            print(phrase->begin(), phrase->end());
+            phrase_length+=2;
         }
 
         else if (typed_num == '#') {
             if (!phrase->empty()) {
                 upper_lower(phrase->back());
             }
-            cout << "         Phrase  : ";
-            print(phrase->begin(), phrase->end());
         }
 
         else if (typed_num == 'n') {
             add_number(phrase);
             current_words->clear();
             characters_typed = 0;
-            cout << "         Phrase  : ";
-            print(phrase->begin(), phrase->end());
+            //TODO phrase_length += sizeof(phrase);
         }
 
         else if (typed_num == 'a') {                    //conventional multitap keyboard
@@ -521,8 +553,6 @@ int main() {
             characters_typed = 0;
             flag_two_esc = 1;
 
-            cout << "         Phrase  : ";
-            print(phrase->begin(), phrase->end());
         }
 
         else cout << "Wrong character, try again\n";
