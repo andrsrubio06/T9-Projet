@@ -18,7 +18,7 @@ Pour compiler le projet il faut les fichiers main.cpp et trie.hpp et aussi le fi
 ## Comment utiliser le clavier T9
 
 Le clavier a été développé en accord de cette [page web](https://en.wikipedia.org/wiki/T9_(predictive_text)), avec des suggestions de mots en anglais. Il a le layout suivante:
-![alt text](https://drive.google.com/file/d/1pZfTdZC8S2MXIJQKuwUqFvLRepHsPInS/view?usp=sharing)
+![alt text](https://github.com/andrsrubio06/T9-Projet/blob/main/ex_clavier.PNG)
   
   ## Implémentation et détails du code
   
