@@ -8,7 +8,6 @@
 #include <assert.h>
 #include <chrono>              //measure time to implement dictionary
 #include <conio.h>
-
 #include "trie.hpp"
 
 //Change according to file that contains library of list of words and frequency
@@ -48,6 +47,8 @@ const map<char, string> keys{ {'2', "abc"}, {'3', "def"}, {'4', "ghi"}, {'5',"jk
 
 unsigned phrase_length = 0;     //to position horizontally the cursor on console
 unsigned number_of_lines = 0;   //to position vertically   the cursor on console
+
+
 
 //
 //Set cursor to x and y position on console
@@ -494,11 +495,11 @@ int main() {
                 phrase_length++;
             }
             else {                                                 
-                current_words->clear();
-                suggested_words->clear();
-                characters_typed = 0;
                 flag_two_esc = 1;
             }
+            current_words->clear();
+            suggested_words->clear();
+            characters_typed = 0;
             phrase_length++;
         }
 
@@ -592,5 +593,12 @@ int main() {
 après, 10 min de quéstions seront posés à nous
 
 ---envoyer le code en avance (48hr au moins avant la soutenance) (Ajouter un READ.md si possible)
+
+
+para utilisar o getch_:
+pro linux n tem conio.h, jeito é usar curses.h 
+q pode ser instalado com sudo apt-get install ncurses-dev
+
+compilar g++ main.cpp trie.hpp -lncurses -o app-keyboard
 
 */
