@@ -11,9 +11,11 @@ Ce projet fait partie du cours IN204 : Programmation Objet & Génie Logiciel de 
 Le développement a été divisé entre Backend (c'est-à-dire, le fonctionnement du clavier T9 proprement dit) et Frontend (l'interface graphique qui permet l'utilisateur d'interagir avec l'application).
 Le développement Backend a été fait sur Windows avec Visual Studio 2019, cependant, des fichiers Linux sont aussi disponibles.
 
-Pour compiler le projet il faut les fichiers main.cpp et trie.hpp et aussi le fichier wordsandfrequency.txt (ou .csv) qui contient le dictionnaire à implémenter. Alors, une façon de le faire serait:
+Pour compiler le projet en Linux il faut les fichiers dans la branche "main": main.cpp et trie.hpp et aussi le fichier wordsandfrequency.txt (ou .csv) qui contient le dictionnaire à implémenter. Alors, une façon de le faire serait:
 - g++ main.cpp trie.hpp -lncurses -o app-keyboard
 - ./app-keyboard (pour lancer l'application)
+
+Si vous voulez la version VS 2019 pour Windows, allez dans la branche "backend" et téléchargez le dossier "KeyboardSearchEx" qui contient la solution.
 
 ## Comment utiliser le clavier T9
 
@@ -28,6 +30,8 @@ Le clavier a été développé en accord de cette [page web](https://en.wikipedi
   temps qui soit capable d'effectuer une recherche d'un mot de façon rapide. Pour cela, on a choisi la structure [Trie](https://en.wikipedia.org/wiki/Trie).
   Avec un dictionnaire en Trie, on aura une recherche d'un mot d'un complexité au maximum égale à la longueur du mot le plus longue, et un quantité de noeuds 
   d'au maximum la longueur du mot le plus long le nombre de lettres possibles ('a' à 'z').
+  
+  Pour l'implementation de la database du dictionnaire, on a utilisé le fichier disponible sur ce [lien](https://www.kaggle.com/rtatman/english-word-frequency).
   
   ![alt text](https://camo.githubusercontent.com/8487a43200d8d4c9993154623868caa74143367eaa240b1e2d67dbfb5d7d1d2c/68747470733a2f2f342e62702e626c6f6773706f742e636f6d2f2d474e5763354b554d4759632f5741736b502d4548464b492f4141414141414141457a342f3879696b7863326e69596779714830465746616671355554705f6b554b364f3541434c63422f73313630302f5472696544617461537472756374757265496d706c2e706e67)
   
@@ -57,8 +61,20 @@ Le clavier a été développé en accord de cette [page web](https://en.wikipedi
   - Mots en majuscule après un '.' , '!' ou '?'
   - Effacer phrase avec touche 'c'
 
- ### Points à améliorer
+ ## Points à améliorer
  - La correcte utilisation des flèches '<-' et '->' pour se balader dans la phrase et changer n'importe quel mot.
  - Changement des fréquences d'utilisation des mots en temps réel. Cependant, l'efficacité du code sera affecté car: soit on doit accéder au fichier dictionnaire .txt à chaque mot tapé (cher en temps du code), soit on accès le trie, change la fréquence d'utilisation d'un noeud à chaque mot entrée (peu cher en temps du code) et à la fin du programme retraduire la Trie en dictionnaire .txt (cher, mais sera faite qu'une fois à la fin).
  - Ajouter des noeuds dans la trie avec accent et chiffres spéciaux (comme ç) pour être compatible au français. Pour cela, il faut les ajouter aux fonctions du trie, que pour le moment considère l'alphabet de 26 lettres.
  - Si un mot de taille 'n' n'a pas de suggestion, suggérer les mots de taille plus grande que 'n'. (Ex.: 'perfe' n'est pas un mot, mais on peut déduire que l'utilisateur veut écrire 'perfect') 
+
+## Licence
+This program is free software; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation; either version 2 of the License, or (at your option) any later version.
+This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more details.
+You should have received a copy of the GNU General Public License along with this program; if not, write to the Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+For more information, read the LICENCE file available in the project root.
+
+## Références
+- https://en.wikipedia.org/wiki/T9_(predictive_text)
+- https://perso.ensta-paris.fr/~bmonsuez/Cours/doku.php?id=in204:resources
+- https://www.kaggle.com/rtatman/english-word-frequency
+- https://en.wikipedia.org/wiki/Trie
