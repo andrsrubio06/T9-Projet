@@ -54,6 +54,7 @@ Le clavier a été développé en accord de cette [page web](https://en.wikipedi
   - Mettre en majuscule/minuscule avec touche '#'
   - Parcourir parmi les suggestions avec touche '*'
   - Mots en majuscule après un '.' , '!' ou '?'
+  - Deux escapes ajoutent automatiquement un '.'
   - Effacer phrase avec touche 'c'
 
  ### Points à améliorer
