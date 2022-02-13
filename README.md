@@ -15,7 +15,7 @@ Pour compiler le projet en Linux il faut les fichiers dans la branche "main": ma
 - g++ main.cpp trie.hpp -lncurses -o app-keyboard
 - ./app-keyboard (pour lancer l'application)
 
-Si vous voulez la version VS 2019 pour Windows, téléchargez le dossier "KeyboardSearchEx" qui contient la solution.
+Si vous voulez la version VS 2019 pour Windows, allez dans la branche "backend" et téléchargez le dossier "KeyboardSearchEx" qui contient la solution.
 
 ## Comment utiliser le clavier T9
 
