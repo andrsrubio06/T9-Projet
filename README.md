@@ -31,6 +31,8 @@ Le clavier a été développé en accord de cette [page web](https://en.wikipedi
   Avec un dictionnaire en Trie, on aura une recherche d'un mot d'un complexité au maximum égale à la longueur du mot le plus longue, et un quantité de noeuds 
   d'au maximum la longueur du mot le plus long le nombre de lettres possibles ('a' à 'z').
   
+  Pour l'implementation de la database du dictionnaire, on a utilisé le fichier disponible sur ce [lien](https://www.kaggle.com/rtatman/english-word-frequency).
+  
   ![alt text](https://camo.githubusercontent.com/8487a43200d8d4c9993154623868caa74143367eaa240b1e2d67dbfb5d7d1d2c/68747470733a2f2f342e62702e626c6f6773706f742e636f6d2f2d474e5763354b554d4759632f5741736b502d4548464b492f4141414141414141457a342f3879696b7863326e69596779714830465746616671355554705f6b554b364f3541434c63422f73313630302f5472696544617461537472756374757265496d706c2e706e67)
   
   Pour l'implémenter, un fichier .txt ou .csv (défini au début du programme) qui contient les mots est leurs fréquences d'utilisation en ordre décroissante est lu est traduite en Trie. 
@@ -59,8 +61,14 @@ Le clavier a été développé en accord de cette [page web](https://en.wikipedi
   - Mots en majuscule après un '.' , '!' ou '?'
   - Effacer phrase avec touche 'c'
 
- ### Points à améliorer
+ ## Points à améliorer
  - La correcte utilisation des flèches '<-' et '->' pour se balader dans la phrase et changer n'importe quel mot.
  - Changement des fréquences d'utilisation des mots en temps réel. Cependant, l'efficacité du code sera affecté car: soit on doit accéder au fichier dictionnaire .txt à chaque mot tapé (cher en temps du code), soit on accès le trie, change la fréquence d'utilisation d'un noeud à chaque mot entrée (peu cher en temps du code) et à la fin du programme retraduire la Trie en dictionnaire .txt (cher, mais sera faite qu'une fois à la fin).
  - Ajouter des noeuds dans la trie avec accent et chiffres spéciaux (comme ç) pour être compatible au français. Pour cela, il faut les ajouter aux fonctions du trie, que pour le moment considère l'alphabet de 26 lettres.
  - Si un mot de taille 'n' n'a pas de suggestion, suggérer les mots de taille plus grande que 'n'. (Ex.: 'perfe' n'est pas un mot, mais on peut déduire que l'utilisateur veut écrire 'perfect') 
+
+## Références
+- https://en.wikipedia.org/wiki/T9_(predictive_text)
+- https://perso.ensta-paris.fr/~bmonsuez/Cours/doku.php?id=in204:resources
+- https://www.kaggle.com/rtatman/english-word-frequency
+- https://en.wikipedia.org/wiki/Trie
