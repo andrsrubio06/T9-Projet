@@ -392,12 +392,8 @@ void add_number(vector<string>* phrase) {
 }
 
 //
-// Main fonction
-int main() {
-
-    Trie dictionary;
-    file_to_dictionary(FILENAME, &dictionary);
-
+//T9 Keyboard fonction itself
+void t9_keyboard_on_console(Trie* dictionary) {
     vector<string>* current_words = new vector<string>;        //words that are a suggestion or a tree branch
     vector<string>* suggested_words = new vector<string>;      //words that are a suggestion
     vector<string>* phrase = new vector<string>;
@@ -405,7 +401,7 @@ int main() {
     unsigned characters_typed = 0;                             //quantity of characters typed
     int flag_two_esc = 0;                                      //used to identify if two ESCAPE ('0') were pressed. If true, it'll 
                                                                //a dot ('.') in place
-    string ponctuation_marks[4] = { ",", ".", "!", "?"};
+    string ponctuation_marks[4] = { ",", ".", "!", "?" };
 
 
     cout << "\n------SUGGESTED WORDS MECHANISM------ ------- ------- -------\n";
@@ -426,9 +422,7 @@ int main() {
     cout << " ------------------------------------ ------- ------- -------\n\n";
 
 
-
-
-    while(true) {
+    while (true) {
         cursor_goto(0, 23);
         printf("\33[2K\n\33[2K\n\33[2K\n\33[2K\n\33[2K\n\33[2K"); //Clear console, 6 lines
         cursor_goto(0, 23);
@@ -445,10 +439,10 @@ int main() {
             cout << "                 : ";
         }
 
-        cursor_goto(20 + phrase_length, 23+number_of_lines);
+        cursor_goto(20 + phrase_length, 23 + number_of_lines);
         typed_num = _getch();                                    //get digit from user
-        cursor_goto(0, 24+number_of_lines);
-        
+        cursor_goto(0, 24 + number_of_lines);
+
 
         if (typed_num == 'e') break;
 
@@ -465,10 +459,10 @@ int main() {
         }
 
         else if (typed_num >= '2' && typed_num <= '9') {      //GET WORD SUGGESTIONS
-            characters_typed = concatenate(characters_typed,typed_num - 48);                //add digit in characters_typed
-            suggested_words = suggestions(typed_num, &characters_typed, &dictionary, current_words); //get suggestions
+            characters_typed = concatenate(characters_typed, typed_num - 48);                //add digit in characters_typed
+            suggested_words = suggestions(typed_num, &characters_typed, dictionary, current_words); //get suggestions
 
-            if(!phrase->empty() && !flag_two_esc) phrase->pop_back();
+            if (!phrase->empty() && !flag_two_esc) phrase->pop_back();
 
             if (!suggested_words->empty()) {                         //Assert there's at least one suggestion
                 if (phrase->empty() || phrase->back() == "." ||      //Begin of phrase or after .?! -> Upper case in suggestions
@@ -485,7 +479,7 @@ int main() {
             else {
                 phrase->push_back(to_string(characters_typed));
             }
-            
+
             flag_two_esc = 0;
             phrase_length++;
         }
@@ -494,7 +488,7 @@ int main() {
                 phrase->push_back(".");
                 phrase_length++;
             }
-            else {                                                 
+            else {
                 flag_two_esc = 1;
             }
             current_words->clear();
@@ -521,7 +515,7 @@ int main() {
                 }
                 else {                              //if middle/end of words -> show last suggestions
                     string num_last_word = word_to_chars(phrase->back());
-                    suggested_words = suggestions_from_erase(&characters_typed, num_last_word, &dictionary, current_words);
+                    suggested_words = suggestions_from_erase(&characters_typed, num_last_word, dictionary, current_words);
                     if (!suggested_words->empty()) {
                         phrase->pop_back();
                     }
@@ -550,7 +544,7 @@ int main() {
             suggested_words->clear();
             characters_typed = 0;
             flag_two_esc = 1;
-            phrase_length+=2;
+            phrase_length += 2;
             add_ponctuation_mark(phrase, ponctuation_marks);
         }
 
@@ -567,7 +561,7 @@ int main() {
         }
 
         else if (typed_num == 'a') {                  //ADD WORD IN MULTITAP KEYBOARD
-            add_word_multitap(phrase, &dictionary);
+            add_word_multitap(phrase, dictionary);
             current_words->clear();
             suggested_words->clear();
             characters_typed = 0;
@@ -583,6 +577,17 @@ int main() {
 
         else cout << "Wrong character, try again\n";
     }
+}
+
+
+//
+// Main fonction
+int main() {
+
+    Trie dictionary;
+    file_to_dictionary(FILENAME, &dictionary);
+
+    t9_keyboard_on_console(&dictionary);
 
     return 0;
 }
