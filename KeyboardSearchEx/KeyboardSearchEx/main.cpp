@@ -414,13 +414,13 @@ int main() {
     cout << "2:9 - keyboard letters                ------- ------- -------\n";
     cout << "  0 - ESC                            |   1   |   2   |   3   |\n";
     cout << "  * - next suggested word            |  ,.?! | a,b,c | d,e,f |\n";
-    cout << "  # : Upper/lower case                ------- ------- ------- \n";
+    cout << "  # - Upper/lower case                ------- ------- ------- \n";
     cout << "  C - erase letter                   |   4   |   5   |   6   |\n";
     cout << "  c - clear search                   | g,h,i | j,k,l | m,n,o |\n";
-    cout << "  n : change words to number          ------- ------- -------\n";
-    cout << "  a : add new words (Multitap key)   |   7   |   8   |   9   |\n";
+    cout << "  n - change words to number          ------- ------- -------\n";
+    cout << "  a - add new words (Multitap key)   |   7   |   8   |   9   |\n";
     cout << "  e - exit                           |p,q,r,s| t,u,v |w,x,y,z|\n";
-    cout << "                                      ------- ------- -------\n";
+    cout << "<,> - move through the text           ------- ------- -------\n";
     cout << "                                     |   *   |   0   |   #   |\n";
     cout << "                                     |       |  ESC  |       |\n";
     cout << " ------------------------------------ ------- ------- -------\n\n";
@@ -573,32 +573,16 @@ int main() {
             characters_typed = 0;
             flag_two_esc = 1;
         }
+        else if (typed_num == '<') {
+            phrase_length--;
+        }
+
+        else if (typed_num == '>') {
+            phrase_length++;
+        }
 
         else cout << "Wrong character, try again\n";
     }
 
     return 0;
 }
-
-
-/*
--------------------------------------soutenance fev 10-17 -----------------------------------------------
-20min de présentation
--quest-ce que vous faitez, un slide
--choix d'architectures (qui sont les agents principaux, les algortihes principaux, ...)
--comment on a géré la modularité et la evolution du code (avoir un code de qualité, que si lit facilement)
--exécuter le code
--concluer avec des améliorations qu'on pourrait faire au futur
-
-après, 10 min de quéstions seront posés à nous
-
----envoyer le code en avance (48hr au moins avant la soutenance) (Ajouter un READ.md si possible)
-
-
-para utilisar o getch_:
-pro linux n tem conio.h, jeito é usar curses.h 
-q pode ser instalado com sudo apt-get install ncurses-dev
-
-compilar g++ main.cpp trie.hpp -lncurses -o app-keyboard
-
-*/
