@@ -11,9 +11,11 @@ Ce projet fait partie du cours IN204 : Programmation Objet & Génie Logiciel de 
 Le développement a été divisé entre Backend (c'est-à-dire, le fonctionnement du clavier T9 proprement dit) et Frontend (l'interface graphique qui permet l'utilisateur d'interagir avec l'application).
 Le développement Backend a été fait sur Windows avec Visual Studio 2019, cependant, des fichiers Linux sont aussi disponibles.
 
-Pour compiler le projet il faut les fichiers main.cpp et trie.hpp et aussi le fichier wordsandfrequency.txt (ou .csv) qui contient le dictionnaire à implémenter. Alors, une façon de le faire serait:
+Pour compiler le projet en Linux il faut les fichiers dans la branche "main": main.cpp et trie.hpp et aussi le fichier wordsandfrequency.txt (ou .csv) qui contient le dictionnaire à implémenter. Alors, une façon de le faire serait:
 - g++ main.cpp trie.hpp -lncurses -o app-keyboard
 - ./app-keyboard (pour lancer l'application)
+
+Si vous voulez la version VS 2019 pour Windows, téléchargez le dossier "KeyboardSearchEx" qui contient la solution.
 
 ## Comment utiliser le clavier T9
 
