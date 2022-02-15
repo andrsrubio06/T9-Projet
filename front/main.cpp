@@ -25,14 +25,14 @@
 
 
 sf::Text createButtonLabel(sf::Font& font, const std::string character,
-							sf::Vector2f buttonSize, sf::Vector2f position) {
+							 int buttonSize, sf::Vector2f position) {
     sf::Text newButton;
     newButton.setFont(font);
-    newButton.setCharacterSize( buttonSize.y/2);
+    newButton.setCharacterSize( buttonSize/4);
     newButton.setStyle(sf::Text::Bold);
     newButton.setString(character);
     newButton.setPosition(position);
-	newButton.setOutlineThickness(buttonSize.x /50);
+	newButton.setOutlineThickness(buttonSize/50);
     newButton.setOutlineColor(sf::Color::White);
     newButton.setFillColor(sf::Color::Blue);
 
@@ -51,41 +51,63 @@ sf::RectangleShape crateButtonShape (const sf::Vector2f buttonSize, sf::Vector2f
 	return newButton;
 }
 
+bool overButton(sf::RenderWindow& window, sf::RectangleShape button){
+		
+		if ((sf::Mouse::getPosition(window).x - button.getGlobalBounds().left >= 0) &&
+        	(sf::Mouse::getPosition(window).y - button.getGlobalBounds().top >= 0) &&
+        	(sf::Mouse::getPosition(window).x - button.getGlobalBounds().left <= button.getGlobalBounds().width) &&
+        	(sf::Mouse::getPosition(window).y - button.getGlobalBounds().top <= button.getGlobalBounds().height)){
+			return 	true;
+			}
+		return false;
+
+}
 
 
 int main(){
 
     sf::RenderWindow window(sf::VideoMode(360,640), "SFML work!");
 
-    while(window.isOpen()){
 
-        sf::Event event;
+	sf::Event event;
     
         sf::Font font;
         font.loadFromFile("fonts/Amatic-Bold.ttf");
 
 		sf::Vector2f sizeObjects=sf::Vector2f(100,70);
 		
+		int totalButtons=15;
 		//sf::Vector2f position[12];
-		sf::Vector2f initPos=sf::Vector2f(30,300);
-		std::list<sf::RectangleShape> buttonsShape;	
+		sf::Vector2f initPos=sf::Vector2f(30,250);
+		std::vector<sf::RectangleShape> buttonsShape;
 
-		for (int i = 0; i < 12; i++)
+		for (int i = 0; i < totalButtons; i++)
 			//position[i]=sf::Vector2f(initPos.x+sizeObjects.x*(i%3),initPos.y+sizeObjects.y*(i/3));
 			buttonsShape.push_back(crateButtonShape(sizeObjects, sf::Vector2f(initPos.x+sizeObjects.x*(i%3),
 													initPos.y+sizeObjects.y*(i/3)), true));	
 		
 		
 		//sf::Vector2f positionLabel1[12];
-		std::list<sf::Text> buttonsLabel1;	
-		for (int i = 0; i < 12; i++)
-			buttonsLabel1.push_back( createButtonLabel(font,std::to_string(1+i), sizeObjects,
-						sf::Vector2f(initPos.x+sizeObjects.x*(i%3)+10,initPos.y+sizeObjects.y*(i/3))));
+		std::vector<sf::Text> buttonsLabel1;	
+		for (int i = 0; i < totalButtons; i++)
+			buttonsLabel1.push_back( createButtonLabel(font,std::to_string(1+i), sizeObjects.x,
+						sf::Vector2f(initPos.x+sizeObjects.x*(i%3)+sizeObjects.x*0.45,initPos.y+sizeObjects.y*(i/3)+sizeObjects.y*0.1)));
 		
-		std::list<sf::Text> buttonsLabel1;	
-		for (int i = 0; i < 12; i++)
-			buttonsLabel1.push_back( createButtonLabel(font,std::to_string(1+i), sizeObjects,
-						sf::Vector2f(initPos.x+sizeObjects.x*(i%3)+10,initPos.y+sizeObjects.y*(i/3))));	
+		std::vector<sf::Text> buttonsLabel2;	
+		for (int i = 0; i < totalButtons; i++)
+			buttonsLabel2.push_back( createButtonLabel(font,std::to_string(1+i), sizeObjects.x/2,
+						sf::Vector2f(initPos.x+sizeObjects.x*(i%3)+sizeObjects.x*0.3,initPos.y+sizeObjects.y*(i/3)+sizeObjects.y*0.5)));
+
+
+
+		//fenetr
+
+		int auxiliar=0;
+
+    while(window.isOpen()){
+
+        	
+	
 
             while (window.pollEvent(event))
             {
@@ -94,28 +116,97 @@ int main(){
 			        	window.close( );
 			        	break;
 			        case sf::Event::MouseButtonPressed:
-			        	int i=0;
-						for(sf::RectangleShape button : buttonsShape)
-						{
-					
-							if ((sf::Mouse::getPosition(window).x - button.getGlobalBounds().left >= 0) &&
-        						(sf::Mouse::getPosition(window).y - button.getGlobalBounds().top >= 0) &&
-        						(sf::Mouse::getPosition(window).x - button.getGlobalBounds().left <= button.getGlobalBounds().width) &&
-        						(sf::Mouse::getPosition(window).y - button.getGlobalBounds().top <= button.getGlobalBounds().height))
-								std::cout << "You clicked the button "<< i+1 << std::endl;
-							i++;
-						}
-					break;
+					{
+			        	int identifier=0;
+
 						
+
+						if(event.key.code== sf::Mouse::Left){
+			    		    for(sf::RectangleShape button : buttonsShape)
+							{
+							bool over = overButton(window,button);
+							if (over)
+							auxiliar=identifier;
+							identifier++;
+							//Connecter avec l'algorithm du ecriture
+							}
+			    		    buttonsLabel1[auxiliar].setOutlineColor(sf::Color::Green);
+			    		}
+
+			    	break;
+					}
+			    	case sf::Event::MouseButtonReleased:
+					{
+			    		if(event.key.code==sf::Mouse::Left){
+							buttonsLabel1[auxiliar].setOutlineColor(sf::Color::White);
+						}
+			    		    		
+
+			    	break;
+					}
+
+
+					
+						//bool overButton = false;
+						//for(sf::RectangleShape button : buttonsShape){
+						//	if ((sf::Mouse::getPosition(window).x - button.getGlobalBounds().left >= 0) &&
+        				//			(sf::Mouse::getPosition(window).y - button.getGlobalBounds().top >= 0) &&
+        				//			(sf::Mouse::getPosition(window).x - button.getGlobalBounds().left <= button.getGlobalBounds().width) &&
+        				//			(sf::Mouse::getPosition(window).y - button.getGlobalBounds().top <= button.getGlobalBounds().height)){
+						//			overButton = true;
+						//			break;
+						//			}
+						//	identifier++;
+						//}
+						//if (overButton){
+						//	int i=0;
+						//	for(sf::Text button : buttonsLabel1){
+						//		
+						//		if (i==identifier)
+						//		{
+						//		button.setOutlineColor(sf::Color::Green);
+						//		}
+						//	}
+						//
+						//}
 				}
-            
 			}
         window.clear();
 		for(sf::RectangleShape buttonShape : buttonsShape)
 			window.draw(buttonShape);
-		for(sf::Text buttonLabel : buttonsLabel1)
+		for(sf::Text buttonLabel : buttonsLabel1){
+			if(buttonLabel.getString()=="1"){
+				buttonLabel.setString("C");
+				sf::Vector2f temporal= buttonLabel.getPosition();
+				buttonLabel.setPosition(temporal.x,temporal.y+sizeObjects.y*0.2);
+			}
+			else if(buttonLabel.getString()=="2"){	
+				buttonLabel.setString("<-");
+				sf::Vector2f temporal= buttonLabel.getPosition();
+				buttonLabel.setPosition(temporal.x,temporal.y+sizeObjects.y*0.2);
+			}
+			else if(buttonLabel.getString()=="3"){	
+				buttonLabel.setString("->");
+				sf::Vector2f temporal= buttonLabel.getPosition();
+				buttonLabel.setPosition(temporal.x,temporal.y+sizeObjects.y*0.2);
+			}
+			else if(buttonLabel.getString()=="13"){	
+				buttonLabel.setString("*");
+				sf::Vector2f temporal= buttonLabel.getPosition();
+				buttonLabel.setPosition(temporal.x,temporal.y+sizeObjects.y*0.2);
+			}
+			else if(buttonLabel.getString()=="14"){	
+				buttonLabel.setString("0");
+				sf::Vector2f temporal= buttonLabel.getPosition();
+				buttonLabel.setPosition(temporal.x,temporal.y+sizeObjects.y*0.2);
+			}
+			else if(buttonLabel.getString()=="15"){	
+				buttonLabel.setString("#");
+				sf::Vector2f temporal= buttonLabel.getPosition();
+				buttonLabel.setPosition(temporal.x,temporal.y+sizeObjects.y*0.2);
+			}
 			window.draw(buttonLabel);
-
+		}
         window.display();
 	}
     return EXIT_SUCCESS;
