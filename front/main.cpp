@@ -143,7 +143,7 @@ int main(){
 			    		if(event.key.code==sf::Mouse::Left){
 							buttonsLabel1[auxiliar].setOutlineColor(sf::Color::White);
 						}
-			    		    		
+			    		    		///ecriture blablal, function
 
 			    	break;
 					}
