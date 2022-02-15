@@ -12,7 +12,7 @@ Le développement a été divisé entre Backend (c'est-à-dire, le fonctionnemen
 Le développement Backend a été fait sur Windows avec Visual Studio 2019, cependant, des fichiers Linux sont aussi disponibles.
 
 Pour compiler le projet en Linux il faut les fichiers dans la branche "main": main.cpp et trie.hpp et aussi le fichier wordsandfrequency.txt (ou .csv) qui contient le dictionnaire à implémenter. Alors, une façon de le faire serait:
-- g++ main.cpp trie.hpp -lncurses -o app-keyboard
+- g++ main.cpp trie.hpp -o app-keyboard
 - ./app-keyboard (pour lancer l'application)
 
 Si vous voulez la version VS 2019 pour Windows, allez dans la branche "backend" et téléchargez le dossier "KeyboardSearchEx" qui contient la solution.
