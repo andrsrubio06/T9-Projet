@@ -38,7 +38,7 @@ sf::Text createButtonLabel(sf::Font& font, const std::string character,
 
     return newButton;
 }
-
+//create a rectangle
 sf::RectangleShape crateButtonShape (const sf::Vector2f buttonSize, sf::Vector2f position, const bool& outline){
 	
 	sf::RectangleShape newButton;
@@ -100,7 +100,8 @@ int main(){
 
 
 
-		//fenetr
+		//fenetre
+
 
 		int auxiliar=0;
 
@@ -122,6 +123,8 @@ int main(){
 						
 
 						if(event.key.code== sf::Mouse::Left){
+
+							////counter of time********
 			    		    for(sf::RectangleShape button : buttonsShape)
 							{
 							bool over = overButton(window,button);
