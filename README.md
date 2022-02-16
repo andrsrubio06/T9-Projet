@@ -70,6 +70,7 @@ Le clavier a été développé en accord de cette [page web](https://en.wikipedi
  - Changement des fréquences d'utilisation des mots en temps réel. Cependant, l'efficacité du code sera affecté car: soit on doit accéder au fichier dictionnaire .txt à chaque mot tapé (cher en temps du code), soit on accès le trie, change la fréquence d'utilisation d'un noeud à chaque mot entrée (peu cher en temps du code) et à la fin du programme retraduire la Trie en dictionnaire .txt (cher, mais sera faite qu'une fois à la fin).
  - Ajouter des noeuds dans la trie avec accent et chiffres spéciaux (comme ç) pour être compatible au français. Pour cela, il faut les ajouter aux fonctions du trie, que pour le moment considère l'alphabet de 26 lettres.
  - Si un mot de taille 'n' n'a pas de suggestion, suggérer les mots de taille plus grande que 'n'. (Ex.: 'perfe' n'est pas un mot, mais on peut déduire que l'utilisateur veut écrire 'perfect') 
+ - Réussir à avoir une interface graphique fonctionnelle et qui réplique exactement le portables du passé (comme le Nokia 3310), avec la fonte des mots pixelisé.
 
 ## Licence
 This program is free software; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation; either version 2 of the License, or (at your option) any later version.
