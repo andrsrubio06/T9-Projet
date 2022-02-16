@@ -23,9 +23,10 @@ Si vous voulez la version VS 2019 pour Windows, allez dans la branche "backend" 
 
 ## Comment utiliser le clavier T9
 
-Le clavier a été développé en accord de cette [page web](https://en.wikipedia.org/wiki/T9_(predictive_text)), avec des suggestions de mots en anglais. Il a le layout suivante:
+Le clavier a été développé en accord de cette [page web](https://en.wikipedia.org/wiki/T9_(predictive_text)), avec des suggestions de mots en anglais. L'interaction avec le programme se fait en touchant les caractères correspondantes. Il a le layout suivante:
 
 ![alt text](https://github.com/andrsrubio06/T9-Projet/blob/main/ex_clavier.PNG)
+
   
   ## Implémentation et détails du code
   
