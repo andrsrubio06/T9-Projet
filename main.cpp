@@ -1,13 +1,25 @@
-#include <map>
 #include <iostream>
+#include <stdexcept>
+#include <ctime>
+#include <cstdlib>
+#include <SFML/System.hpp>
+#include <SFML/Window.hpp>
+#include <SFML/Graphics.hpp>
+#include <iostream>
+#include <list>
+#include <map>
 #include <string>
 #include <fstream>
 #include <sstream>
 #include <vector>
 #include <algorithm>           //for sorting vectors
+#include <numeric>
 #include <assert.h>
 #include <chrono>              //measure time to implement dictionary
 #include "trie.hpp"
+
+
+
 
 //Change according to file that contains library of list of words and frequency
 #define FILENAME "wordsandfrequency.txt"
@@ -17,6 +29,8 @@
                                 // - open file, find word line in the file, change the frequency (too expensive in time)
                                 // - have a table of data structure that stores words and frequency, update that table
                                 //   and fro time to time upload the changes in the file (too expensive in memory)
+
+static const sf::Time TimePerFrame = sf::seconds(1.f/60.f);
 
 #define SIZE_SCREEN 30
 using namespace std;
@@ -93,13 +107,6 @@ void file_to_dictionary(const string filename, Trie* dict) {
     }
     else cout << "Error opening file";
 
-    /*cout << "Search Test:\n";
-    cout << "a = " << dict->search("a") << "\n";
-    cout << "this = " << dict->search("this") << "\n";
-    cout << "beaut = " << dict->search("beaut") << "\n";
-    cout << "asdffg = " << dict->search("asdffg") << "\n";
-    cout << "abccc = " << dict->search("abccc") << "\n";
-    */
 }
 
 
@@ -268,11 +275,11 @@ void add_word_multitap(vector<string>* phrase, Trie* dictionary) {
     char typed_num;
     char old_typed_num = '0';
 
-    cursor_goto(0, 27);
-    cout << "    Add new word : " << new_word;
-    fflush(stdin); typed_num = getchar();
+    //cursor_goto(0, 27);
+    //cout << "    Add new word : " << new_word;
+    //fflush(stdin); typed_num = getchar();
 
-    while (true) {
+    
         cursor_goto(20, 27);
         printf("\33[2K\r");
         if (typed_num == '0' || typed_num == 'e') {
@@ -287,7 +294,7 @@ void add_word_multitap(vector<string>* phrase, Trie* dictionary) {
             }
             else cout << "Word already in dictionary\n";
             phrase_length++;
-            break;
+            
         }
         else if (typed_num >= '2' && typed_num <= '9') {
             typed_chars = keys.find(typed_num)->second;
@@ -323,7 +330,7 @@ void add_word_multitap(vector<string>* phrase, Trie* dictionary) {
             cursor_goto(20 + new_word.size(), 27);
             fflush(stdin); typed_num = getchar();
         }
-    }
+    
 
 }
 
@@ -333,23 +340,19 @@ void add_ponctuation_mark(vector<string>* phrase, string* ponctuation_marks) {
     int i = 0;
     char typed_num;
     phrase->push_back(ponctuation_marks[i]);
-    while (true) {
-        cursor_goto(0, 23);
-        cout << "         Phrase  : ";
-        print(phrase->begin(), phrase->end());
-        cursor_goto(20 + phrase_length, 23 + number_of_lines);
-        fflush(stdin); typed_num = getchar();
-        Clear_line();
-        if (typed_num == '0' || (typed_num >= '2' && typed_num <= '9')) {
-            break;
-        }
-        else if (typed_num == '1') {
+        //cursor_goto(0, 23);
+        //cout << "         Phrase  : ";
+        //print(phrase->begin(), phrase->end());
+        //cursor_goto(20 + phrase_length, 23 + number_of_lines);
+        //fflush(stdin); typed_num = getchar();
+       // Clear_line();
+        if (typed_num == '1') {
             i = (i + 1) % 4;
             phrase->pop_back();
             phrase->push_back(ponctuation_marks[i]);
         }
 
-    }
+    
 }
 
 //
@@ -377,86 +380,76 @@ void rotate_suggestions(vector<string>* suggested_words) {
 void add_number(vector<string>* phrase) {
     string numbers = {};
     char typed_num;
-    while (true) {
-        cursor_goto(0, 27);
-        cout << "   Number format : " << numbers;
-        fflush(stdin); typed_num = getchar();
+        //cursor_goto(0, 27);
+        //cout << "   Number format : " << numbers;
+        //fflush(stdin); typed_num = getchar();
         phrase_length++;
-        printf("\33[2K\r");
+        //printf("\33[2K\r");
         if (typed_num == '0' || typed_num == 'e') {
             phrase->push_back(numbers);
-            break;
         }
         else if (typed_num >= '0' && typed_num <= '9')
             numbers = numbers + to_string(typed_num - 48);
-    }
+    
 }
 
 //
 //T9 Keyboard fonction itself
-void t9_keyboard_on_console(Trie* dictionary) {
-    vector<string>* current_words = new vector<string>;        //words that are a suggestion or a tree branch
-    vector<string>* suggested_words = new vector<string>;      //words that are a suggestion
-    vector<string>* phrase = new vector<string>;
-    char typed_num;                                            //number typed by the user in the prompt line
+void t9_keyboard_on_console(Trie* dictionary, sf::RenderWindow& window, char typed_num, std::vector<sf::Text>& windowLabels,
+							vector<string>* current_words, vector<string>* suggested_words, vector<string>* phrase ) {
+    //char typed_num = typed_one;                                            //number typed by the user in the prompt line
     unsigned characters_typed = 0;                             //quantity of characters typed
     int flag_two_esc = 0;                                      //used to identify if two ESCAPE ('0') were pressed. If true, it'll 
-                                                               //a dot ('.') in place
+                                               //a dot ('.') in place
     string ponctuation_marks[4] = { ",", ".", "!", "?" };
 
-
-    cout << "\n------SUGGESTED WORDS MECHANISM------ ------- ------- -------\n";
-    cout << "                                     |       |       |       |\n";
-    cout << "  1 - ,.!?                           |   C   |   <-  |   ->  |\n";
-    cout << "2:9 - keyboard letters                ------- ------- -------\n";
-    cout << "  0 - ESC                            |   1   |   2   |   3   |\n";
-    cout << "  * - next suggested word            |  ,.?! | a,b,c | d,e,f |\n";
-    cout << "  # - Upper/lower case                ------- ------- ------- \n";
-    cout << "  C - erase letter                   |   4   |   5   |   6   |\n";
-    cout << "  c - clear search                   | g,h,i | j,k,l | m,n,o |\n";
-    cout << "  n - change words to number          ------- ------- -------\n";
-    cout << "  a - add new words (Multitap key)   |   7   |   8   |   9   |\n";
-    cout << "  e - exit                           |p,q,r,s| t,u,v |w,x,y,z|\n";
-    cout << "<,> - move through the text           ------- ------- -------\n";
-    cout << "                                     |   *   |   0   |   #   |\n";
-    cout << "                                     |       |  ESC  |       |\n";
-    cout << " ------------------------------------ ------- ------- -------\n\n";
-
-
-    while (true) {
-        cursor_goto(0, 23);
-        printf("\33[2K\n\33[2K\n\33[2K\n\33[2K\n\33[2K\n\33[2K"); //Clear console, 6 lines
-        cursor_goto(0, 23);
-        cout << "         Phrase  : ";
-        print(phrase->begin(), phrase->end());
-
-        if (characters_typed > 0) {
-            cursor_goto(0, 27);
-            cout << "Suggested words  : ";
-            print(suggested_words->begin(), suggested_words->end());
-        }
-        else {
-            cursor_goto(0, 27);
-            cout << "                 : ";
-        }
-
-        cursor_goto(20 + phrase_length, 23 + number_of_lines);
-        fflush(stdin); typed_num = getchar();                                    //get digit from user
-        cursor_goto(0, 24 + number_of_lines);
+	cout<< typed_num;
+    //cout << "\n------SUGGESTED WORDS MECHANISM------ ------- ------- -------\n";
+    //cout << "                                     |       |       |       |\n";
+    //cout << "  1 - ,.!?                           |   C   |   <-  |   ->  |\n";
+    //cout << "2:9 - keyboard letters                ------- ------- -------\n";
+    //cout << "  0 - ESC                            |   1   |   2   |   3   |\n";
+    //cout << "  * - next suggested word            |  ,.?! | a,b,c | d,e,f |\n";
+    //cout << "  # - Upper/lower case                ------- ------- ------- \n";
+    //cout << "  C - erase letter                   |   4   |   5   |   6   |\n";
+    //cout << "  c - clear search                   | g,h,i | j,k,l | m,n,o |\n";
+    //cout << "  n - change words to number          ------- ------- -------\n";
+    //cout << "  a - add new words (Multitap key)   |   7   |   8   |   9   |\n";
+    //cout << "  e - exit                           |p,q,r,s| t,u,v |w,x,y,z|\n";
+    //cout << "<,> - move through the text           ------- ------- -------\n";
+    //cout << "                                     |   *   |   0   |   #   |\n";
+    //cout << "                                     |       |  ESC  |       |\n";
+    //cout << " ------------------------------------ ------- ------- -------\n\n";
 
 
-        if (typed_num == 'e') break;
+        //cursor_goto(0, 23);
+        //printf("\33[2K\n\33[2K\n\33[2K\n\33[2K\n\33[2K\n\33[2K"); //Clear console, 6 lines
+        //cursor_goto(0, 23);
+        //cout << "         Phrase  : ";
+        //print(phrase->begin(), phrase->end());
+//
+        //if (characters_typed > 0) {
+        //    cursor_goto(0, 27);
+        //    cout << "Suggested words  : ";
+        //    print(suggested_words->begin(), suggested_words->end());
+        //}
+        //else {
+        //    cursor_goto(0, 27);
+        //    cout << "                 : ";
+        //}
+//
+        //cursor_goto(20 + phrase_length, 23 + number_of_lines);
+        //fflush(stdin); typed_num = getchar();                                    //get digit from user
+        //cursor_goto(0, 24 + number_of_lines);
 
+
+        if (typed_num == 'e') 
+			window.close( );
         else if (typed_num == 'c') {                //CLEAR SEARCH
             current_words->clear();
             phrase->clear();
             characters_typed = 0;
             phrase_length = 0;
-        }
-
-        else if (typed_num == 'v') {                 //VIEW CURRENT WORDS (used for debugging)
-            cout << "Current words    : ";
-            print(current_words->begin(), current_words->end());
         }
 
         else if (typed_num >= '2' && typed_num <= '9') {      //GET WORD SUGGESTIONS
@@ -575,21 +568,294 @@ void t9_keyboard_on_console(Trie* dictionary) {
         else if (typed_num == '>') {
             phrase_length++;
         }
-
         else cout << "Wrong character, try again\n";
-    }
+	
+		
+
+		string phraseText="";
+		string suggestText="";
+		phraseText=accumulate(phrase->begin(),phrase->end(),string(" "));
+		cout<<phraseText;
+		windowLabels[0].setString(phraseText);
+		//windowLabels[1].setString(accumulate(current_words->begin(),current_words->end(),string(" ")));
+		windowLabels[2].setString(accumulate(suggested_words->begin(),suggested_words->end(),string(" ")));
+
+
+
 }
 
 
-//
-// Main fonction
-int main() {
-    system("stty -icanon");
+
+
+
+
+
+
+
+//Fuction which creates a text object to show in the buttons
+sf::Text createButtonLabel(sf::Font& font, const std::string character,
+							 int buttonSize, sf::Vector2f position) {
+    sf::Text newButton;
+    newButton.setFont(font);
+    newButton.setCharacterSize( buttonSize/4);
+    newButton.setStyle(sf::Text::Bold);
+    newButton.setString(character);
+    newButton.setPosition(position);
+	newButton.setOutlineThickness(buttonSize/50);
+    newButton.setOutlineColor(sf::Color::White);
+    newButton.setFillColor(sf::Color::Blue);
+
+    return newButton;
+}
+
+//Fuction which creates a rectangleShape object to show in thebuttons
+sf::RectangleShape crateButtonShape (const sf::Vector2f buttonSize, sf::Vector2f position, const bool& outline){
+	
+	sf::RectangleShape newButton;
+	newButton.setSize(buttonSize);
+	newButton.setPosition(position);
+	newButton.setOutlineThickness(3);
+	newButton.setOutlineColor(sf::Color::White);
+	newButton.setFillColor(sf::Color::Transparent);
+	
+	return newButton;
+}
+
+//Fuction which allow to know the button where the cursor is.
+bool overButton(sf::RenderWindow& window, sf::RectangleShape button){
+		
+		if ((sf::Mouse::getPosition(window).x - button.getGlobalBounds().left >= 0) &&
+        	(sf::Mouse::getPosition(window).y - button.getGlobalBounds().top >= 0) &&
+        	(sf::Mouse::getPosition(window).x - button.getGlobalBounds().left <= button.getGlobalBounds().width) &&
+        	(sf::Mouse::getPosition(window).y - button.getGlobalBounds().top <= button.getGlobalBounds().height)){
+			return 	true;
+			}
+		return false;
+
+}
+
+
+
+
+
+int main(){
+
+    sf::RenderWindow window(sf::VideoMode(360,640), "T9 keyboard simulator");
+
+
+	sf::Event event;
+    
+        sf::Font font;
+        font.loadFromFile("fonts/Amatic-Bold.ttf");
+
+		sf::Vector2f sizeObjects=sf::Vector2f(100,70);
+		
+		int totalButtons=15;
+		//sf::Vector2f position[12];
+		sf::Vector2f initPos=sf::Vector2f(30,250);
+		std::vector<sf::RectangleShape> buttonsShape;
+
+		vector<string>* current_words = new vector<string>;        //words that are a suggestion or a tree branch
+    	vector<string>* suggested_words = new vector<string>;      //words that are a suggestion
+    	vector<string>* phrase = new vector<string>;
+    
+
+
+		for (int i = 0; i < totalButtons; i++)
+			//position[i]=sf::Vector2f(initPos.x+sizeObjects.x*(i%3),initPos.y+sizeObjects.y*(i/3));
+			buttonsShape.push_back(crateButtonShape(sizeObjects, sf::Vector2f(initPos.x+sizeObjects.x*(i%3),
+													initPos.y+sizeObjects.y*(i/3)), true));	
+		
+		
+		//sf::Vector2f positionLabel1[12];
+		std::vector<sf::Text> buttonsLabel1;	
+		
+		int buttonPos=0;
+		for (int i = 0; i < totalButtons; i++){
+
+			buttonPos = i+1;
+			//if(i>2 && i<12) buttonPos = i-2;
+
+			buttonsLabel1.push_back( createButtonLabel(font,std::to_string(buttonPos), sizeObjects.x,
+						sf::Vector2f(initPos.x+sizeObjects.x*(i%3)+sizeObjects.x*0.45,initPos.y+sizeObjects.y*(i/3)+sizeObjects.y*0.1)));
+		}
+
+		std::vector<sf::Text> buttonsLabel2;
+		
+		std::string textUnderNumber;
+		int letterOfAlphabet=0;
+		int howManyLetters=0;
+		for (int i = 0; i < totalButtons; i++){
+			textUnderNumber="";
+			if(i>3 && i<12){
+					howManyLetters = (i==9 || i ==11)? 4:3;
+	
+					for (int j =0; j < howManyLetters; j++){
+						textUnderNumber+=" ";
+						textUnderNumber+= (65+letterOfAlphabet);
+						letterOfAlphabet++;
+					}
+			}		
+			else if((i>=0 && i<3)||(i>11 && i<15))
+				textUnderNumber=" ";
+			else
+				textUnderNumber=", . ? !";
+			
+			buttonsLabel2.push_back( createButtonLabel(font,textUnderNumber, sizeObjects.x,
+						sf::Vector2f(initPos.x+sizeObjects.x*(i%3)+sizeObjects.x*0.30,initPos.y+sizeObjects.y*(i/3)+sizeObjects.y*0.5)));
+
+		}
+		//fenetre
+
+	std::vector<sf::Text> windowLabels;
+		for (int i = 0; i < 3; i++){
+			windowLabels.push_back( createButtonLabel(font," a", sizeObjects.x,
+						sf::Vector2f(initPos.x, initPos.y-200+initPos.x*i)));
+		}
+
+
+	int auxiliar=0;
+
+
+	system("stty -icanon");
     Trie dictionary;
     file_to_dictionary(FILENAME, &dictionary);
 
-    t9_keyboard_on_console(&dictionary);
-    system("stty sane");
-    system("cls");
-    return 0;
+    //t9_keyboard_on_console(&dictionary, window);
+
+	sf::Clock clock;
+	sf::Time timeSinceLastUpdate = sf::Time::Zero;
+
+    while(window.isOpen()){
+
+		bool blockClick=true;
+
+		sf::Time dt = clock.restart();
+		timeSinceLastUpdate += dt;
+		
+		while (timeSinceLastUpdate > TimePerFrame){
+			timeSinceLastUpdate -= TimePerFrame;
+
+            while (window.pollEvent(event))
+            {
+				int typed_one=0;
+                switch ( event.type){      //SWITCH
+			        case sf::Event::Closed:
+			        	window.close( );
+			        	break;
+			        case sf::Event::MouseButtonPressed:
+					{
+			        	int identifier=0;
+
+						if(event.key.code== sf::Mouse::Left ){
+							////counter of time
+			    		    for(sf::RectangleShape button : buttonsShape)
+							{
+							bool over = overButton(window,button);
+							if (over)
+							auxiliar=identifier;
+							identifier++;
+							//Connecter avec l'algorithm du ecriture
+							}
+			    		    buttonsLabel1[auxiliar].setOutlineColor(sf::Color::Green);
+							buttonsLabel2[auxiliar].setOutlineColor(sf::Color::Green);
+			    		}
+
+			    	break;
+					}
+			    	case sf::Event::MouseButtonReleased:
+					{
+						
+			    		char clickedCharacter;
+
+						if(event.key.code==sf::Mouse::Left &&blockClick){
+
+							blockClick= !blockClick;
+							buttonsLabel1[auxiliar].setOutlineColor(sf::Color::White);
+							buttonsLabel2[auxiliar].setOutlineColor(sf::Color::White);
+						
+						typed_one=auxiliar;
+						for( int i =0; i<totalButtons;i++){
+							if (typed_one>2 &&typed_one<12)
+								clickedCharacter=(typed_one+46);
+							else if(typed_one==1)
+								clickedCharacter='c';
+							else if(typed_one==2)
+								clickedCharacter='<';
+							else if(typed_one==3)
+								clickedCharacter='>';
+							else if(typed_one==12)
+								clickedCharacter='*';
+							else if(typed_one==13)
+								clickedCharacter='0';
+							else if(typed_one==14)
+								clickedCharacter='#';	
+						}
+						//cout<< clickedCharacter;
+						t9_keyboard_on_console(&dictionary, window, clickedCharacter, windowLabels, current_words, suggested_words, phrase);
+    
+						}
+					break;
+					}
+
+				}
+			}
+		
+		}
+
+        window.clear();
+		for(sf::RectangleShape buttonShape : buttonsShape)
+			window.draw(buttonShape);
+
+		for(sf::Text buttonLabel : buttonsLabel1){
+			if(buttonLabel.getString()=="1"){
+				buttonLabel.setString("C");
+				sf::Vector2f temporal= buttonLabel.getPosition();
+				buttonLabel.setPosition(temporal.x,temporal.y+sizeObjects.y*0.2);
+			}
+			else if(buttonLabel.getString()=="2"){	
+				buttonLabel.setString("<-");
+				sf::Vector2f temporal= buttonLabel.getPosition();
+				buttonLabel.setPosition(temporal.x,temporal.y+sizeObjects.y*0.2);
+			}
+			else if(buttonLabel.getString()=="3"){	
+				buttonLabel.setString("->");
+				sf::Vector2f temporal= buttonLabel.getPosition();
+				buttonLabel.setPosition(temporal.x,temporal.y+sizeObjects.y*0.2);
+			}
+			else if(buttonLabel.getString()=="13"){	
+				buttonLabel.setString("*");
+				sf::Vector2f temporal= buttonLabel.getPosition();
+				buttonLabel.setPosition(temporal.x,temporal.y+sizeObjects.y*0.2);
+			}
+			else if(buttonLabel.getString()=="14"){	
+				buttonLabel.setString("0");
+				sf::Vector2f temporal= buttonLabel.getPosition();
+				buttonLabel.setPosition(temporal.x,temporal.y+sizeObjects.y*0.2);
+			}
+			else if(buttonLabel.getString()=="15"){	
+				buttonLabel.setString("#");
+				sf::Vector2f temporal= buttonLabel.getPosition();
+				buttonLabel.setPosition(temporal.x,temporal.y+sizeObjects.y*0.2);
+			}
+
+			window.draw(buttonLabel);
+		}
+		
+		for(sf::Text textUnder : buttonsLabel2){
+			window.draw(textUnder);
+		}
+
+		for(sf::Text label : windowLabels){
+			window.draw(label);
+		}
+
+        window.display();
+	
+	
+	}
+	system("stty sane");
+    return EXIT_SUCCESS;
+	
 }
+	
