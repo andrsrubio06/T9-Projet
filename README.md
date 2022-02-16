@@ -12,16 +12,21 @@ Le développement a été divisé entre Backend (c'est-à-dire, le fonctionnemen
 Le développement Backend a été fait sur Windows avec Visual Studio 2019, cependant, des fichiers Linux sont aussi disponibles.
 
 Pour compiler le projet en Linux il faut les fichiers dans la branche "main": main.cpp et trie.hpp et aussi le fichier wordsandfrequency.txt (ou .csv) qui contient le dictionnaire à implémenter. Alors, une façon de le faire serait:
-- g++ main.cpp trie.hpp -lncurses -o app-keyboard
+- g++ main.cpp trie.hpp -o app-keyboard
 - ./app-keyboard (pour lancer l'application)
+
+Également pour lancer l'application en utilisant sfml la commande suivante est nécessaire, le fichier contenant l'utilisation de sfml d'autre part n'est pas dans la branche main, il est dans la branche testing.
+- g++ -c -Wall -O3 main.cpp trie.hpp && g++ *.o -o app-keyboard -lsfml-graphics -lsfml-window -lsfml-system && ./app-keyboard 
+
 
 Si vous voulez la version VS 2019 pour Windows, allez dans la branche "backend" et téléchargez le dossier "KeyboardSearchEx" qui contient la solution.
 
 ## Comment utiliser le clavier T9
 
-Le clavier a été développé en accord de cette [page web](https://en.wikipedia.org/wiki/T9_(predictive_text)), avec des suggestions de mots en anglais. Il a le layout suivante:
+Le clavier a été développé en accord de cette [page web](https://en.wikipedia.org/wiki/T9_(predictive_text)), avec des suggestions de mots en anglais. L'interaction avec le programme se fait en touchant les caractères correspondantes. Il a le layout suivante:
 
 ![alt text](https://github.com/andrsrubio06/T9-Projet/blob/main/ex_clavier.PNG)
+
   
   ## Implémentation et détails du code
   
@@ -66,6 +71,7 @@ Le clavier a été développé en accord de cette [page web](https://en.wikipedi
  - Changement des fréquences d'utilisation des mots en temps réel. Cependant, l'efficacité du code sera affecté car: soit on doit accéder au fichier dictionnaire .txt à chaque mot tapé (cher en temps du code), soit on accès le trie, change la fréquence d'utilisation d'un noeud à chaque mot entrée (peu cher en temps du code) et à la fin du programme retraduire la Trie en dictionnaire .txt (cher, mais sera faite qu'une fois à la fin).
  - Ajouter des noeuds dans la trie avec accent et chiffres spéciaux (comme ç) pour être compatible au français. Pour cela, il faut les ajouter aux fonctions du trie, que pour le moment considère l'alphabet de 26 lettres.
  - Si un mot de taille 'n' n'a pas de suggestion, suggérer les mots de taille plus grande que 'n'. (Ex.: 'perfe' n'est pas un mot, mais on peut déduire que l'utilisateur veut écrire 'perfect') 
+ - Réussir à avoir une interface graphique fonctionnelle et qui réplique exactement le portables du passé (comme le Nokia 3310), avec la fonte des mots pixelisé.
 
 ## Licence
 This program is free software; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation; either version 2 of the License, or (at your option) any later version.
