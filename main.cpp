@@ -64,21 +64,6 @@ unsigned number_of_lines = 0;   //to position vertically   the cursor on console
 
 
 
-//
-//Set cursor to x and y position on console
-void cursor_goto(int x, int y) {
-    printf("%c[%d;%df", 0x1B, y, x);
-}
-
-//
-//Print on console vector content
-template <typename iteratorT>
-void print(iteratorT first, iteratorT end) {
-    for (; first != end; first++) {
-        cout << *first << " ";
-    }
-    cout << "\n";
-}
 
 
 //
@@ -151,13 +136,8 @@ unsigned concatenate(unsigned x, unsigned y) {
     return x * pow + y;
 }
 
-//
-//Clear_line one line of the console
-void Clear_line() {
-    cout << "\x1b[1F\x1b[2K";
-}
 
-//
+
 //Convert a word to its correspondant in numbers on the keyboard
 string word_to_chars(string word) {
     int i = 0;
@@ -191,7 +171,7 @@ string word_to_chars(string word) {
 }
 
 
-//
+
 //Returns vector of word suggestions, while changing the current_words vector
 vector<string>* suggestions(const char typed_num, const unsigned* characters_typed, Trie* dictionary, vector<string>* current_words) {
     vector<pair<int, string>> suggested_pair;                        //vector of suggested words (where dictionary.search = 1)
@@ -265,7 +245,7 @@ vector<string>* suggestions_from_erase(unsigned* characters_typed, string num_la
 }
 
 
-//
+
 //Conventional multitap keyboard. Use: tap number until the word you want appears.
 //Use '1' if next letter is equal to previous one (Ideally, we would set up a timer)
 void add_word_multitap(vector<string>* phrase, Trie* dictionary) {
@@ -275,13 +255,8 @@ void add_word_multitap(vector<string>* phrase, Trie* dictionary) {
     char typed_num;
     char old_typed_num = '0';
 
-    //cursor_goto(0, 27);
-    //cout << "    Add new word : " << new_word;
-    //fflush(stdin); typed_num = getchar();
-
     
-        cursor_goto(20, 27);
-        printf("\33[2K\r");
+        
         if (typed_num == '0' || typed_num == 'e') {
             phrase->push_back(new_word);
             //ADD TO THE FILE, with frequency 100, if not in dictionary
@@ -302,13 +277,10 @@ void add_word_multitap(vector<string>* phrase, Trie* dictionary) {
             int it = 0;
             while (typed_num == old_typed_num) {
                 cout << "    Add new word : " << new_word << typed_chars[it] << "\n";
-                cursor_goto(20 + new_word.size(), 27);
-                fflush(stdin); typed_num = getchar();
-                printf("\33[2K\r");
+               
                 if (typed_num == old_typed_num)
                     it = (it + 1) % typed_chars.length();
             }
-            cout << "\n";
             new_word.push_back(typed_chars[it]);
             phrase_length++;
         }
@@ -316,36 +288,25 @@ void add_word_multitap(vector<string>* phrase, Trie* dictionary) {
             if (!new_word.empty())
                 new_word.pop_back();
             cout << "    Add new word : " << new_word << "\n";
-            cursor_goto(20 + new_word.size(), 27);
-            fflush(stdin); typed_num = getchar();
         }
         else if (typed_num == '1') {
             cout << "    Add new word : " << new_word << "\n";
-            cursor_goto(20 + new_word.size(), 27);
-            fflush(stdin); typed_num = getchar();
 
         }
         else {
             cout << "Wrong character, try again\n";
-            cursor_goto(20 + new_word.size(), 27);
-            fflush(stdin); typed_num = getchar();
         }
     
 
 }
 
-//
+
 //Add . , ! or ? in the phrase. Switch beetwen marks by tapping '1'
 void add_ponctuation_mark(vector<string>* phrase, string* ponctuation_marks) {
     int i = 0;
     char typed_num;
     phrase->push_back(ponctuation_marks[i]);
-        //cursor_goto(0, 23);
-        //cout << "         Phrase  : ";
-        //print(phrase->begin(), phrase->end());
-        //cursor_goto(20 + phrase_length, 23 + number_of_lines);
-        //fflush(stdin); typed_num = getchar();
-       // Clear_line();
+       
         if (typed_num == '1') {
             i = (i + 1) % 4;
             phrase->pop_back();
@@ -355,7 +316,7 @@ void add_ponctuation_mark(vector<string>* phrase, string* ponctuation_marks) {
     
 }
 
-//
+
 //Convert first digit of word into uper or lower
 void upper_lower(string& word) {
     if (!word.empty()) {
@@ -365,7 +326,7 @@ void upper_lower(string& word) {
     }
 }
 
-//
+
 //Rotate through vector of words
 void rotate_suggestions(vector<string>* suggested_words) {
     if (!suggested_words->empty()) {
@@ -375,14 +336,12 @@ void rotate_suggestions(vector<string>* suggested_words) {
     }
 }
 
-//
+
 // Add numbers instead of words in the phrase
 void add_number(vector<string>* phrase) {
     string numbers = {};
     char typed_num;
-        //cursor_goto(0, 27);
-        //cout << "   Number format : " << numbers;
-        //fflush(stdin); typed_num = getchar();
+        
         phrase_length++;
         //printf("\33[2K\r");
         if (typed_num == '0' || typed_num == 'e') {
@@ -392,201 +351,6 @@ void add_number(vector<string>* phrase) {
             numbers = numbers + to_string(typed_num - 48);
     
 }
-
-//
-//T9 Keyboard fonction itself
-void t9_keyboard_on_console(Trie* dictionary, sf::RenderWindow& window, char typed_num, std::vector<sf::Text>& windowLabels,
-							vector<string>* current_words, vector<string>* suggested_words, vector<string>* phrase ) {
-    //char typed_num = typed_one;                                            //number typed by the user in the prompt line
-    unsigned characters_typed = 0;                             //quantity of characters typed
-    int flag_two_esc = 0;                                      //used to identify if two ESCAPE ('0') were pressed. If true, it'll 
-                                               //a dot ('.') in place
-    string ponctuation_marks[4] = { ",", ".", "!", "?" };
-
-	cout<< typed_num;
-    //cout << "\n------SUGGESTED WORDS MECHANISM------ ------- ------- -------\n";
-    //cout << "                                     |       |       |       |\n";
-    //cout << "  1 - ,.!?                           |   C   |   <-  |   ->  |\n";
-    //cout << "2:9 - keyboard letters                ------- ------- -------\n";
-    //cout << "  0 - ESC                            |   1   |   2   |   3   |\n";
-    //cout << "  * - next suggested word            |  ,.?! | a,b,c | d,e,f |\n";
-    //cout << "  # - Upper/lower case                ------- ------- ------- \n";
-    //cout << "  C - erase letter                   |   4   |   5   |   6   |\n";
-    //cout << "  c - clear search                   | g,h,i | j,k,l | m,n,o |\n";
-    //cout << "  n - change words to number          ------- ------- -------\n";
-    //cout << "  a - add new words (Multitap key)   |   7   |   8   |   9   |\n";
-    //cout << "  e - exit                           |p,q,r,s| t,u,v |w,x,y,z|\n";
-    //cout << "<,> - move through the text           ------- ------- -------\n";
-    //cout << "                                     |   *   |   0   |   #   |\n";
-    //cout << "                                     |       |  ESC  |       |\n";
-    //cout << " ------------------------------------ ------- ------- -------\n\n";
-
-
-        //cursor_goto(0, 23);
-        //printf("\33[2K\n\33[2K\n\33[2K\n\33[2K\n\33[2K\n\33[2K"); //Clear console, 6 lines
-        //cursor_goto(0, 23);
-        //cout << "         Phrase  : ";
-        //print(phrase->begin(), phrase->end());
-//
-        //if (characters_typed > 0) {
-        //    cursor_goto(0, 27);
-        //    cout << "Suggested words  : ";
-        //    print(suggested_words->begin(), suggested_words->end());
-        //}
-        //else {
-        //    cursor_goto(0, 27);
-        //    cout << "                 : ";
-        //}
-//
-        //cursor_goto(20 + phrase_length, 23 + number_of_lines);
-        //fflush(stdin); typed_num = getchar();                                    //get digit from user
-        //cursor_goto(0, 24 + number_of_lines);
-
-
-        if (typed_num == 'e') 
-			window.close( );
-        else if (typed_num == 'c') {                //CLEAR SEARCH
-            current_words->clear();
-            phrase->clear();
-            characters_typed = 0;
-            phrase_length = 0;
-        }
-
-        else if (typed_num >= '2' && typed_num <= '9') {      //GET WORD SUGGESTIONS
-            characters_typed = concatenate(characters_typed, typed_num - 48);                //add digit in characters_typed
-            suggested_words = suggestions(typed_num, &characters_typed, dictionary, current_words); //get suggestions
-
-            if (!phrase->empty() && !flag_two_esc) phrase->pop_back();
-
-            if (!suggested_words->empty()) {                         //Assert there's at least one suggestion
-                if (phrase->empty() || phrase->back() == "." ||      //Begin of phrase or after .?! -> Upper case in suggestions
-                    phrase->back() == "?" || phrase->back() == "!") {
-
-                    for (int i = 0; i < suggested_words->size(); i++) {
-                        auto word_temp = suggested_words->at(i);
-                        word_temp[0] = toupper(word_temp[0]);
-                        suggested_words->at(i) = word_temp;
-                    }
-                }
-                phrase->push_back(suggested_words->front());        //insert suggestion in phrase
-            }
-            else {
-                phrase->push_back(to_string(characters_typed));
-            }
-
-            flag_two_esc = 0;
-            phrase_length++;
-        }
-        else if (typed_num == '0') {          //ESCAPE 
-            if (flag_two_esc) {
-                phrase->push_back(".");
-                phrase_length++;
-            }
-            else {
-                flag_two_esc = 1;
-            }
-            current_words->clear();
-            suggested_words->clear();
-            characters_typed = 0;
-            phrase_length++;
-        }
-
-        else if (typed_num == '*') {        //ROTATE THROUGH SUGGESTIONS
-            if (!suggested_words->empty()) {
-                rotate_suggestions(suggested_words);
-                phrase->pop_back();
-                phrase->push_back(suggested_words->front());
-            }
-        }
-
-        else if (typed_num == 'C') {        //ERASE LAST DIGIT
-            if (!phrase->empty()) {
-                if (phrase->back().size() <= 1) {   //if last word is of size 1 -> delete last word in phrase
-                    phrase->pop_back();
-                    suggested_words->clear();
-                    characters_typed = 0;
-                    if (phrase_length > 0) phrase_length--;    //because of escape
-                }
-                else {                              //if middle/end of words -> show last suggestions
-                    string num_last_word = word_to_chars(phrase->back());
-                    suggested_words = suggestions_from_erase(&characters_typed, num_last_word, dictionary, current_words);
-                    if (!suggested_words->empty()) {
-                        phrase->pop_back();
-                    }
-                    if (phrase->empty() || phrase->back() == "." ||      //Begin of phrase or after .?! -> Upper case in suggestions
-                        phrase->back() == "?" || phrase->back() == "!") {
-
-                        for (int i = 0; i < suggested_words->size(); i++) {
-                            auto word_temp = suggested_words->at(i);
-                            word_temp[0] = toupper(word_temp[0]);
-                            suggested_words->at(i) = word_temp;
-                        }
-                    }
-                    if (!suggested_words->empty()) {
-                        phrase->push_back(suggested_words->front());
-                    }
-                    else {
-                        phrase->back().pop_back();
-                    }
-                }
-            }
-            if (phrase_length > 0) phrase_length--;
-        }
-
-        else if (typed_num == '1') {        //PONCTUATION MARK
-            current_words->clear();
-            suggested_words->clear();
-            characters_typed = 0;
-            flag_two_esc = 1;
-            phrase_length += 2;
-            add_ponctuation_mark(phrase, ponctuation_marks);
-        }
-
-        else if (typed_num == '#') {        //UPPER lower CASE
-            if (!phrase->empty()) {
-                upper_lower(phrase->back());
-            }
-        }
-
-        else if (typed_num == 'n') {        //ADD IN NUMBER FORMAT
-            add_number(phrase);
-            current_words->clear();
-            characters_typed = 0;
-        }
-
-        else if (typed_num == 'a') {                  //ADD WORD IN MULTITAP KEYBOARD
-            add_word_multitap(phrase, dictionary);
-            current_words->clear();
-            suggested_words->clear();
-            characters_typed = 0;
-            flag_two_esc = 1;
-        }
-        else if (typed_num == '<') {
-            phrase_length--;
-        }
-
-        else if (typed_num == '>') {
-            phrase_length++;
-        }
-        else cout << "Wrong character, try again\n";
-	
-		
-
-		string phraseText="";
-		string suggestText="";
-		phraseText=accumulate(phrase->begin(),phrase->end(),string(" "));
-		cout<<phraseText;
-		windowLabels[0].setString(phraseText);
-		//windowLabels[1].setString(accumulate(current_words->begin(),current_words->end(),string(" ")));
-		windowLabels[2].setString(accumulate(suggested_words->begin(),suggested_words->end(),string(" ")));
-
-
-
-}
-
-
-
-
 
 
 
@@ -635,13 +399,9 @@ bool overButton(sf::RenderWindow& window, sf::RectangleShape button){
 }
 
 
-
-
-
 int main(){
 
     sf::RenderWindow window(sf::VideoMode(360,640), "T9 keyboard simulator");
-
 
 	sf::Event event;
     
@@ -656,10 +416,14 @@ int main(){
 		std::vector<sf::RectangleShape> buttonsShape;
 
 		vector<string>* current_words = new vector<string>;        //words that are a suggestion or a tree branch
-    	vector<string>* suggested_words = new vector<string>;      //words that are a suggestion
-    	vector<string>* phrase = new vector<string>;
+        vector<string>* suggested_words = new vector<string>;      //words that are a suggestion
+        vector<string>* phrase = new vector<string>;
+        char typed_num;                                            //number typed by the user in the prompt line
+        unsigned characters_typed = 0;                             //quantity of characters typed
+        int flag_two_esc = 0;                                      //used to identify if two ESCAPE ('0') were pressed. If true, it'll 
+                                                                   //a dot ('.') in place
+        string ponctuation_marks[4] = { ",", ".", "!", "?" };
     
-
 
 		for (int i = 0; i < totalButtons; i++)
 			//position[i]=sf::Vector2f(initPos.x+sizeObjects.x*(i%3),initPos.y+sizeObjects.y*(i/3));
@@ -671,14 +435,39 @@ int main(){
 		std::vector<sf::Text> buttonsLabel1;	
 		
 		int buttonPos=0;
+        string text="";
+        double temporal =0;
 		for (int i = 0; i < totalButtons; i++){
+            temporal =0;
+            
+            if(i==0){
+                text="C";
+				temporal =1;
+			}else if(i==1){	
+                text="<-";
+				temporal= 1;
+			}else if(i==2){	
+				text="->";
+				temporal= 1;
+    
+			}else if(i==12){	
+				text="*";
+				temporal= 1;
+			}else if(i==13){	
+				text="0";
+				temporal= 1;
+			}else if(i==14){	
+				text="#";
+				temporal= 1; 
+			}else{
+                text=to_string(i-2);
+            }
 
-			buttonPos = i+1;
-			//if(i>2 && i<12) buttonPos = i-2;
-
-			buttonsLabel1.push_back( createButtonLabel(font,std::to_string(buttonPos), sizeObjects.x,
-						sf::Vector2f(initPos.x+sizeObjects.x*(i%3)+sizeObjects.x*0.45,initPos.y+sizeObjects.y*(i/3)+sizeObjects.y*0.1)));
-		}
+			buttonsLabel1.push_back( createButtonLabel(font,text, sizeObjects.x,
+			sf::Vector2f(initPos.x+sizeObjects.x*(i%3)+sizeObjects.x*0.45,initPos.y+sizeObjects.y*(i/3)+sizeObjects.y*0.1+0.2*sizeObjects.y*temporal)));      
+        
+        }
+        
 
 		std::vector<sf::Text> buttonsLabel2;
 		
@@ -706,13 +495,11 @@ int main(){
 
 		}
 		//fenetre
-
 	std::vector<sf::Text> windowLabels;
-		for (int i = 0; i < 3; i++){
-			windowLabels.push_back( createButtonLabel(font," a", sizeObjects.x,
-						sf::Vector2f(initPos.x, initPos.y-200+initPos.x*i)));
+		for (int i = 0; i < 2; i++){
+			windowLabels.push_back( createButtonLabel(font," ", sizeObjects.x,
+						sf::Vector2f(initPos.x, initPos.y-220+initPos.x*i*5)));
 		}
-
 
 	int auxiliar=0;
 
@@ -721,11 +508,13 @@ int main(){
     Trie dictionary;
     file_to_dictionary(FILENAME, &dictionary);
 
-    //t9_keyboard_on_console(&dictionary, window);
 
+    //setting time to avoid problems with the events
 	sf::Clock clock;
 	sf::Time timeSinceLastUpdate = sf::Time::Zero;
 
+
+    
     while(window.isOpen()){
 
 		bool blockClick=true;
@@ -746,8 +535,7 @@ int main(){
 			        case sf::Event::MouseButtonPressed:
 					{
 			        	int identifier=0;
-
-						if(event.key.code== sf::Mouse::Left ){
+						if(event.key.code== sf::Mouse::Left){
 							////counter of time
 			    		    for(sf::RectangleShape button : buttonsShape)
 							{
@@ -755,7 +543,7 @@ int main(){
 							if (over)
 							auxiliar=identifier;
 							identifier++;
-							//Connecter avec l'algorithm du ecriture
+							
 							}
 			    		    buttonsLabel1[auxiliar].setOutlineColor(sf::Color::Green);
 							buttonsLabel2[auxiliar].setOutlineColor(sf::Color::Green);
@@ -792,8 +580,153 @@ int main(){
 								clickedCharacter='#';	
 						}
 						//cout<< clickedCharacter;
-						t9_keyboard_on_console(&dictionary, window, clickedCharacter, windowLabels, current_words, suggested_words, phrase);
-    
+
+                        char typed_num = clickedCharacter; 
+
+                        string ponctuation_marks[4] = { ",", ".", "!", "?" };
+
+                            if (typed_num == 'e') 
+	                    		window.close( );
+                            else if (typed_num == 'c') {                //CLEAR SEARCH
+                                current_words->clear();
+                                phrase->clear();
+                                characters_typed = 0;
+                                phrase_length = 0;
+                            }
+
+                            else if (typed_num >= '2' && typed_num <= '9') {      //GET WORD SUGGESTIONS
+                                characters_typed = concatenate(characters_typed, typed_num - 48);                //add digit in characters_typed
+                                suggested_words = suggestions(typed_num, &characters_typed, &dictionary, current_words); //get suggestions
+
+                                if (!phrase->empty() && !flag_two_esc) phrase->pop_back();
+
+                                if (!suggested_words->empty()) {                         //Assert there's at least one suggestion
+                                    if (phrase->empty() || phrase->back() == "." ||      //Begin of phrase or after .?! -> Upper case in suggestions
+                                        phrase->back() == "?" || phrase->back() == "!") {
+                                        
+                                        for (int i = 0; i < suggested_words->size(); i++) {
+                                            auto word_temp = suggested_words->at(i);
+                                            word_temp[0] = toupper(word_temp[0]);
+                                            suggested_words->at(i) = word_temp;
+                                        }
+                                    }
+                                    phrase->push_back(suggested_words->front());        //insert suggestion in phrase
+                                }
+                                else {
+                                    phrase->push_back(to_string(characters_typed));
+                                }
+
+                                flag_two_esc = 0;
+                                phrase_length++;
+                            }
+                            else if (typed_num == '0') {          //ESCAPE 
+                                if (flag_two_esc) {
+                                    phrase->push_back(".");
+                                    phrase_length++;
+                                }
+                                else {
+                                    flag_two_esc = 1;
+                                }
+                                current_words->clear();
+                                suggested_words->clear();
+                                characters_typed = 0;
+                                phrase_length++;
+                            }
+
+                            else if (typed_num == '*') {        //ROTATE THROUGH SUGGESTIONS
+                                if (!suggested_words->empty()) {
+                                    rotate_suggestions(suggested_words);
+                                    phrase->pop_back();
+                                    phrase->push_back(suggested_words->front());
+                                }
+                            }
+
+                            else if (typed_num == 'C') {        //ERASE LAST DIGIT
+                                if (!phrase->empty()) {
+                                    if (phrase->back().size() <= 1) {   //if last word is of size 1 -> delete last word in phrase
+                                        phrase->pop_back();
+                                        suggested_words->clear();
+                                        characters_typed = 0;
+                                        if (phrase_length > 0) phrase_length--;    //because of escape
+                                    }
+                                    else {                              //if middle/end of words -> show last suggestions
+                                        string num_last_word = word_to_chars(phrase->back());
+                                        suggested_words = suggestions_from_erase(&characters_typed, num_last_word, &dictionary, current_words);
+                                        if (!suggested_words->empty()) {
+                                            phrase->pop_back();
+                                        }
+                                        if (phrase->empty() || phrase->back() == "." ||      //Begin of phrase or after .?! -> Upper case in suggestions
+                                            phrase->back() == "?" || phrase->back() == "!") {
+                                            
+                                            for (int i = 0; i < suggested_words->size(); i++) {
+                                                auto word_temp = suggested_words->at(i);
+                                                word_temp[0] = toupper(word_temp[0]);
+                                                suggested_words->at(i) = word_temp;
+                                            }
+                                        }
+                                        if (!suggested_words->empty()) {
+                                            phrase->push_back(suggested_words->front());
+                                        }
+                                        else {
+                                            phrase->back().pop_back();
+                                        }
+                                    }
+                                }
+                                if (phrase_length > 0) phrase_length--;
+                            }
+
+                            else if (typed_num == '1') {        //PONCTUATION MARK
+                                current_words->clear();
+                                suggested_words->clear();
+                                characters_typed = 0;
+                                flag_two_esc = 1;
+                                phrase_length += 2;
+                                add_ponctuation_mark(phrase, ponctuation_marks);
+                            }
+
+                            else if (typed_num == '#') {        //UPPER lower CASE
+                                if (!phrase->empty()) {
+                                    upper_lower(phrase->back());
+                                }
+                            }
+
+                            else if (typed_num == 'n') {        //ADD IN NUMBER FORMAT
+                                add_number(phrase);
+                                current_words->clear();
+                                characters_typed = 0;
+                            }
+
+                            else if (typed_num == 'a') {                  //ADD WORD IN MULTITAP KEYBOARD
+                                add_word_multitap(phrase, &dictionary);
+                                current_words->clear();
+                                suggested_words->clear();
+                                characters_typed = 0;
+                                flag_two_esc = 1;
+                            }
+                            else if (typed_num == '<') {
+                                phrase_length--;
+                            }
+
+                            else if (typed_num == '>') {
+                                phrase_length++;
+                            }
+                            else cout << "Wrong character, try again\n";
+
+
+
+	                    	string phraseText="";
+	                    	string suggestText="";
+                            
+	                    	phraseText=accumulate(phrase->begin(),phrase->end(),string(""));
+	                    	
+                            cout<<phraseText<< endl;
+
+	                    	windowLabels[0].setString(phraseText);
+	                    	windowLabels[1].setString(accumulate(suggested_words->begin(),suggested_words->end(),string("")));
+
+
+
+
 						}
 					break;
 					}
@@ -808,36 +741,8 @@ int main(){
 			window.draw(buttonShape);
 
 		for(sf::Text buttonLabel : buttonsLabel1){
-			if(buttonLabel.getString()=="1"){
-				buttonLabel.setString("C");
-				sf::Vector2f temporal= buttonLabel.getPosition();
-				buttonLabel.setPosition(temporal.x,temporal.y+sizeObjects.y*0.2);
-			}
-			else if(buttonLabel.getString()=="2"){	
-				buttonLabel.setString("<-");
-				sf::Vector2f temporal= buttonLabel.getPosition();
-				buttonLabel.setPosition(temporal.x,temporal.y+sizeObjects.y*0.2);
-			}
-			else if(buttonLabel.getString()=="3"){	
-				buttonLabel.setString("->");
-				sf::Vector2f temporal= buttonLabel.getPosition();
-				buttonLabel.setPosition(temporal.x,temporal.y+sizeObjects.y*0.2);
-			}
-			else if(buttonLabel.getString()=="13"){	
-				buttonLabel.setString("*");
-				sf::Vector2f temporal= buttonLabel.getPosition();
-				buttonLabel.setPosition(temporal.x,temporal.y+sizeObjects.y*0.2);
-			}
-			else if(buttonLabel.getString()=="14"){	
-				buttonLabel.setString("0");
-				sf::Vector2f temporal= buttonLabel.getPosition();
-				buttonLabel.setPosition(temporal.x,temporal.y+sizeObjects.y*0.2);
-			}
-			else if(buttonLabel.getString()=="15"){	
-				buttonLabel.setString("#");
-				sf::Vector2f temporal= buttonLabel.getPosition();
-				buttonLabel.setPosition(temporal.x,temporal.y+sizeObjects.y*0.2);
-			}
+        
+
 
 			window.draw(buttonLabel);
 		}
