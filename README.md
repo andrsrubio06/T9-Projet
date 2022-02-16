@@ -15,6 +15,10 @@ Pour compiler le projet en Linux il faut les fichiers dans la branche "main": ma
 - g++ main.cpp trie.hpp -o app-keyboard
 - ./app-keyboard (pour lancer l'application)
 
+Également pour lancer l'application en utilisant sfml la commande suivante est nécessaire, le fichier contenant l'utilisation de sfml d'autre part n'est pas dans la branche main, il est dans la branche testing.
+- g++ -c -Wall -O3 main.cpp trie.hpp && g++ *.o -o app-keyboard -lsfml-graphics -lsfml-window -lsfml-system && ./app-keyboard 
+
+
 Si vous voulez la version VS 2019 pour Windows, allez dans la branche "backend" et téléchargez le dossier "KeyboardSearchEx" qui contient la solution.
 
 ## Comment utiliser le clavier T9
